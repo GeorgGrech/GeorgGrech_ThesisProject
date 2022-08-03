@@ -11,14 +11,21 @@ public class ItemSpawner : MonoBehaviour
     private float terrainSizeX;
     private float terrainSizeZ;
 
-    [SerializeField] private GameObject playerBase;
-    [SerializeField] private GameObject enemyBase;
+    [SerializeField] private GameObject playerBase; //Player base, where resources are dropped off by player
+    [SerializeField] private GameObject enemyBase; //Enemy base, where resources are dropped off by enemy agent
+
+    //[SerializeField] private GameObject playerPrefab; //Player prefab
+    [SerializeField] private GameObject enemyPrefab; //Enemy agent
+
     [SerializeField] private GameObject resource1; //First resource - eg. Tree
     [SerializeField] private GameObject resource2; //First resource - eg. Iron Mine
 
     [SerializeField] private int resourceSpacing; //Spacing between resources
     [SerializeField] private float resourceSpawnShift; //Amount of random shift from original resource spawn
     [SerializeField] private float baseDistance; //Minimum empty distance around bases
+
+    [SerializeField] private float baseCenterOffset; //Max random offset from center of map for base spawn
+    [SerializeField] private float playerSpawnDistance; //Spawn distance for both player and enemy for their respective bases
 
     private Vector3 playerBaseLocation; //Location in world of Player Base;
     private Vector3 enemyBaseLocation; //Location in world of Enemy Base;
@@ -32,6 +39,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnPlayerBase(); //Spawn Player Base
         SpawnEnemyBase(); //Spawn Enemy Base taking note of Player Base location
         SpawnResources(); //Spawn Resources
+        RelocatePlayer(); //Move player to base
 
     }
 
@@ -43,7 +51,7 @@ public class ItemSpawner : MonoBehaviour
 
     private void SpawnPlayerBase()
     {
-        GameObject instantiatedBase = Instantiate(playerBase, GenerateRandomSpawn(), Quaternion.identity);
+        GameObject instantiatedBase = Instantiate(playerBase, GenerateRandomBaseSpawn(), Quaternion.identity);
         playerBaseLocation = instantiatedBase.transform.position;
     }
 
@@ -52,7 +60,7 @@ public class ItemSpawner : MonoBehaviour
         Vector3 spawnLocation;
         do
         {
-            spawnLocation = GenerateRandomSpawn();
+            spawnLocation = GenerateRandomBaseSpawn();
         } while (Vector3.Distance(spawnLocation,playerBaseLocation)<baseDistance); //Check that spawn location is not too close to enemy base
 
         GameObject instantiatedBase = Instantiate(enemyBase, spawnLocation, Quaternion.identity);
@@ -120,13 +128,35 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+    void RelocatePlayer() //Find Player in world and move him near player base
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player.transform.position = new Vector3((playerBaseLocation.x - playerSpawnDistance), playerBaseLocation.y, playerBaseLocation.z);
+    }
+
+    void SpawnEnemy() //Spawn Enemy agent
+    {
+        Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
+    }
+
+    private Vector3 GenerateRandomBaseSpawn()
+    {
+        Vector3 spawnLocation = new Vector3(Random.Range((terrainSizeX/2)-baseCenterOffset,(terrainSizeX/2)+baseCenterOffset),
+            0, //Note: Spawn Location Y may be changed in case of shaped terrain, in which case obtain Y using Terrain.sampleHeight after first generation
+            Random.Range((terrainSizeZ/2) - baseCenterOffset, (terrainSizeZ/2) + baseCenterOffset));
+
+        return spawnLocation;
+    }
+
+    /*
     private Vector3 GenerateRandomSpawn()
     {
-        Vector3 spawnLocation = new Vector3(Random.Range(0,terrainSizeX),
+        Vector3 spawnLocation = new Vector3(Random.Range(0, terrainSizeX),
             0, //Note: Spawn Location Y may be changed in case of shaped terrain, in which case obtain Y using Terrain.sampleHeight after first generation
             Random.Range(0, terrainSizeZ));
 
         return spawnLocation;
     }
+    */
 
 }
