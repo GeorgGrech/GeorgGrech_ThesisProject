@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8787270098230843113}
   - component: {fileID: 8604620108675476411}
   - component: {fileID: 2371791570592972919}
+  - component: {fileID: 3823532189659043665}
   m_Layer: 0
   m_Name: PlayerBasePlaceholder
   m_TagString: Untagged
@@ -95,4 +96,17 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!135 &3823532189659043665
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507343056718839266}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}

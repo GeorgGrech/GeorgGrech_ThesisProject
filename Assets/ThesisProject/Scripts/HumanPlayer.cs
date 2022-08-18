@@ -1,8 +1,8 @@
-    using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class HumanPlayer : ParentPlayer
 {
     private CharacterController controller;
     [SerializeField] private float movementSpeed = 5f;
@@ -45,10 +45,5 @@ public class Player : MonoBehaviour
         {
             transform.LookAt(new Vector3(_hit.point.x, transform.position.y, _hit.point.z));
         }
-    }
-
-    void AddGravity()
-    {
-       
     }
 }

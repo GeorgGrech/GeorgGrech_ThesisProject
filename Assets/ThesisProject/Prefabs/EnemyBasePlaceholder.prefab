@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 3564828068550248751}
   - component: {fileID: 6154022910346892940}
   - component: {fileID: 3555978194007664294}
+  - component: {fileID: 3260432923383956244}
+  - component: {fileID: -221434141461707368}
   m_Layer: 0
   m_Name: EnemyBasePlaceholder
   m_TagString: Untagged
@@ -96,3 +98,28 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!135 &3260432923383956244
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5520394253958327883}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-221434141461707368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5520394253958327883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 200deb9b092f9b94eb4517c26614c4a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
