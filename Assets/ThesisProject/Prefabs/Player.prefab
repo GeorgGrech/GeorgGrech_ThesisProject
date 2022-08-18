@@ -226,4 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d17c31c18ed534e9a5e3c98ae90645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxInventorySize: 20
+  inventoryAmountFree: 0
+  inventory: []
   movementSpeed: 5

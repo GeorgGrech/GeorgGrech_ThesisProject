@@ -10,8 +10,9 @@ public class HumanPlayer : ParentPlayer
     float gravity = 9.8f;
     float verticalSpeed = 0;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         controller = GetComponent<CharacterController>();
     }
 
@@ -19,6 +20,7 @@ public class HumanPlayer : ParentPlayer
     {
         MovementInput();
         RotationInput();
+        KeyboardInput();
     }
 
     void MovementInput()
@@ -44,6 +46,14 @@ public class HumanPlayer : ParentPlayer
         if (Physics.Raycast(_ray, out _hit))
         {
             transform.LookAt(new Vector3(_hit.point.x, transform.position.y, _hit.point.z));
+        }
+    }
+
+    void KeyboardInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            base.Interact();
         }
     }
 }

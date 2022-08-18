@@ -9,14 +9,16 @@ using UnityEngine;
 /// </summary>
 public class ParentPlayer : MonoBehaviour
 {
-    protected int maxInventorySize;
-    protected int inventoryAmountUsed;
+    public int maxInventorySize = 20;
+    public int inventoryAmountFree;
     public List<Resource> inventory; //List of resource items to be deposited into base for points. May be changed to tuple with name and points in case of problems with system.
 
+    private GameObject interactableObject; //object to interact with (resource/base)
+
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
-        Debug.Log("Test");
+        ResetInventory(); //Set inventory free amount to max
     }
 
     // Update is called once per frame
@@ -30,9 +32,26 @@ public class ParentPlayer : MonoBehaviour
      */
 
     // Player interacts with world (ie. human player presses interaction key). Will carry out appropriate action if within trigger of base or resource
-    void Interact()
+    protected virtual void Interact()
     {
-        Debug.Log("Interacting...");
+        Debug.Log("Interact Action requested");
+        if(interactableObject != null)
+        {
+            Debug.Log("Object found. Interacting...");
+            interactableObject.SendMessageUpwards("InteractAction", gameObject);
+        }
+    }
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+
+        Debug.Log("OnTriggerEnter");
+        interactableObject = other.gameObject;
+     }
+
+    protected virtual void OnTriggerExit(Collider other)
+    {
+        interactableObject = null;
     }
 
     /*
@@ -47,8 +66,16 @@ public class ParentPlayer : MonoBehaviour
         Debug.Log("Interacting with base");
     }*/
 
+    public bool IsInventoryFull(int resourceSize)
+    {
+        if ((inventoryAmountFree == 0) || (resourceSize > inventoryAmountFree))
+            return true;
+        else return false;
+    }
+
+
     private void ResetInventory()
     {
-        inventoryAmountUsed = 0;
+        inventoryAmountFree = maxInventorySize;
     }
 }

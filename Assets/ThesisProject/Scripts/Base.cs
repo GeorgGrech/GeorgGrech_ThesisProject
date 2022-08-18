@@ -16,6 +16,7 @@ public class Base : MonoBehaviour
         
     }
 
+    /*
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -25,5 +26,11 @@ public class Base : MonoBehaviour
         }
 
         //else statement for enemy
+    }*/
+
+    void InteractAction(GameObject playerObject)
+    {
+        Debug.Log("Base interaction");
+        //GiveResources();
     }
 }
