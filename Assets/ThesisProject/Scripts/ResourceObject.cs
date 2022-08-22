@@ -68,6 +68,7 @@ public class ResourceObject : MonoBehaviour
         //else condition to get enemy script
 
 
+
         int deposited; //Keep track of amount deposited to subtract from dropAmount in case of operation cancel
         //Add line for enemyPlayerScript
         for (deposited = 0; deposited < dropAmount; deposited++)
@@ -77,6 +78,7 @@ public class ResourceObject : MonoBehaviour
                 Debug.Log("Inventory full. Cancelling operation.");
                 break;
             }
+            playerScript.PauseMovement(); //Pause player movement for duration of resource gathering
 
             yield return new WaitForSeconds(dropTime);
            
@@ -86,15 +88,17 @@ public class ResourceObject : MonoBehaviour
             Debug.Log("Item deposited");
         }
 
-        Debug.Log("All items deposited. Destroying resource object.");
+        playerScript.ResumeMovement(); //Resume player movement
 
-        if(deposited == dropAmount)
+        if (deposited == dropAmount)
         {
             Destroy(gameObject); //GameObject currently gets destroyed instantly upon full inventory due to skipping the for loop entirely
+            Debug.Log("All items deposited. Destroying resource object.");
         }
         else
         {
             dropAmount -= deposited;
+            Debug.Log("Depositing interrupted. "+dropAmount+" items left.");
         }
     }
 

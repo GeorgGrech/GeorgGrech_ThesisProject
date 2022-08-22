@@ -5,7 +5,7 @@ using UnityEngine;
 public class HumanPlayer : ParentPlayer
 {
     private CharacterController controller;
-    [SerializeField] private float movementSpeed = 5f;
+    //[SerializeField] private float movementSpeed = 5f;
 
     float gravity = 9.8f;
     float verticalSpeed = 0;

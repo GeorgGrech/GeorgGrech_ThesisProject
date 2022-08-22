@@ -15,10 +15,14 @@ public class ParentPlayer : MonoBehaviour
 
     private GameObject interactableObject; //object to interact with (resource/base)
 
+    [SerializeField] protected float movementSpeed; //To be used in charactercontroller for human player and A* scripts for AI player
+    [SerializeField] protected float defaultMovementSpeed = 5; //To be used in charactercontroller for human player and A* scripts for AI player
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
         ResetInventory(); //Set inventory free amount to max
+        ResumeMovement();
     }
 
     // Update is called once per frame
@@ -77,5 +81,15 @@ public class ParentPlayer : MonoBehaviour
     private void ResetInventory()
     {
         inventoryAmountFree = maxInventorySize;
+    }
+
+    public void PauseMovement()
+    {
+        movementSpeed = 0;
+    }
+
+    public void ResumeMovement()
+    {
+        movementSpeed = defaultMovementSpeed;
     }
 }
