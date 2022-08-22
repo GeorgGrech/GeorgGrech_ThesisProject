@@ -58,31 +58,44 @@ public class ResourceObject : MonoBehaviour
     public IEnumerator GiveResources(GameObject playerObject)
     {
         playerInteracting = true;
-        HumanPlayer humanPlayerScript = null;
-        //Add line for enemyPlayerScript
-        for (int i = 0; i < dropAmount; i++)
+
+        ParentPlayer playerScript = null;
+
+        if (playerObject.CompareTag("Player"))
         {
-            if (playerObject.CompareTag("Player")) //Move this check to before for loop
-            //Check player inventory
+            playerScript = playerObject.GetComponent<HumanPlayer>();
+        }
+        //else condition to get enemy script
+
+
+        int deposited; //Keep track of amount deposited to subtract from dropAmount in case of operation cancel
+        //Add line for enemyPlayerScript
+        for (deposited = 0; deposited < dropAmount; deposited++)
+        {
+            if (playerScript.IsInventoryFull(resourceDropped.inventorySpaceTaken))
             {
-                humanPlayerScript = playerObject.GetComponent<HumanPlayer>();
-                if (humanPlayerScript.IsInventoryFull(resourceDropped.inventorySpaceTaken))
-                {
-                    Debug.Log("Inventory full. Cancelling operation.");
-                    break;
-                }
+                Debug.Log("Inventory full. Cancelling operation.");
+                break;
             }
+
             yield return new WaitForSeconds(dropTime);
-            if (playerObject.CompareTag("Player")) //Remove redundant check
-            {
-                humanPlayerScript.inventory.Add(resourceDropped);
-                humanPlayerScript.inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
-            }
+           
+            playerScript.inventory.Add(resourceDropped);
+            playerScript.inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
+
             Debug.Log("Item deposited");
         }
 
         Debug.Log("All items deposited. Destroying resource object.");
-        Destroy(gameObject); //GameObject currently gets destroyed instantly upon full inventory due to skipping the for loop entirely. 
+
+        if(deposited == dropAmount)
+        {
+            Destroy(gameObject); //GameObject currently gets destroyed instantly upon full inventory due to skipping the for loop entirely
+        }
+        else
+        {
+            dropAmount -= deposited;
+        }
     }
 
     void InteractAction(GameObject playerObject)
