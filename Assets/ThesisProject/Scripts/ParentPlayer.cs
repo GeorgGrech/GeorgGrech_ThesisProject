@@ -13,6 +13,10 @@ public class ParentPlayer : MonoBehaviour
     public int inventoryAmountFree;
     public List<Resource> inventory; //List of resource items to be deposited into base for points. May be changed to tuple with name and points in case of problems with system.
 
+    public int score = 0; //Total score
+
+    private bool playerInteracting;
+
     private GameObject interactableObject; //object to interact with (resource/base)
 
     [SerializeField] protected float movementSpeed; //To be used in charactercontroller for human player and A* scripts for AI player
@@ -78,9 +82,16 @@ public class ParentPlayer : MonoBehaviour
     }
 
 
-    private void ResetInventory()
+    public void AddScore(int index)
+    {
+        score += inventory[index].points;
+        Debug.Log(inventory[index].name + " with " + inventory[index].points + " points deposited. " + tag + " score is now: " + score);
+    }
+
+    public void ResetInventory()
     {
         inventoryAmountFree = maxInventorySize;
+        inventory.Clear();
     }
 
     public void PauseMovement()

@@ -100,6 +100,8 @@ public class ResourceObject : MonoBehaviour
             dropAmount -= deposited;
             Debug.Log("Depositing interrupted. "+dropAmount+" items left.");
         }
+
+        playerInteracting = false;
     }
 
     void InteractAction(GameObject playerObject)
