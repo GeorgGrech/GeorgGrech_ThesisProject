@@ -40,9 +40,9 @@ public class ParentPlayer : MonoBehaviour
      */
 
     // Player interacts with world (ie. human player presses interaction key). Will carry out appropriate action if within trigger of base or resource
-    protected virtual void Interact()
+    public virtual void Interact()
     {
-        Debug.Log("Interact Action requested");
+        Debug.Log("Interact Action requested by "+gameObject.tag);
         if(interactableObject != null)
         {
             Debug.Log("Object found. Interacting...");

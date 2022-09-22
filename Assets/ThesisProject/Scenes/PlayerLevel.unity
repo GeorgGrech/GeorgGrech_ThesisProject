@@ -256,7 +256,8 @@ MonoBehaviour:
     type: 3}
   enemyBase: {fileID: 5520394253958327883, guid: e8b12522404a3644482f2e5917c1a4bb,
     type: 3}
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 8011776797989357586, guid: 99ddaea740702304688962633d70fee5,
+    type: 3}
   resource1: {fileID: 1675795153502595374, guid: a690ef1443aa5a0418a4d859f6f2299d,
     type: 3}
   resource2: {fileID: 7708505589065550268, guid: 7817039006b40374db337e11051ae088,

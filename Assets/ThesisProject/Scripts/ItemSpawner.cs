@@ -40,6 +40,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnEnemyBase(); //Spawn Enemy Base taking note of Player Base location
         SpawnResources(); //Spawn Resources
         RelocatePlayer(); //Move player to base
+        SpawnEnemy(); //Spawn Enemy near Enemy Base
 
     }
 

@@ -32,6 +32,7 @@ TagManager:
   - tile
   - PlayerBase
   - EnemyBase
+  - Enemy
   layers:
   - Default
   - TransparentFX
