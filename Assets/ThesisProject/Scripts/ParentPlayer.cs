@@ -25,6 +25,7 @@ public class ParentPlayer : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        inventory = new List<Resource>();
         ResetInventory(); //Set inventory free amount to max
         ResumeMovement();
     }
