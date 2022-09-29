@@ -19,6 +19,7 @@ public class ItemSpawner : MonoBehaviour
 
     [SerializeField] private GameObject resource1; //First resource - eg. Tree
     [SerializeField] private GameObject resource2; //First resource - eg. Iron Mine
+    private GameObject ResourceParent; //World object to contain all resource gameobjects for tidiness
 
     [SerializeField] private int resourceSpacing; //Spacing between resources
     [SerializeField] private float resourceSpawnShift; //Amount of random shift from original resource spawn
@@ -70,7 +71,12 @@ public class ItemSpawner : MonoBehaviour
 
     private void SpawnResources()
     {
-        
+
+        ResourceParent = new GameObject
+        {
+            name = "Resources"
+        };
+
         for (int z = 0; z < terrainSizeZ; z += resourceSpacing)
         {
             for (int x = 0; x < terrainSizeX; x += resourceSpacing)
@@ -97,10 +103,11 @@ public class ItemSpawner : MonoBehaviour
                     int randomNum = Random.Range(0, 10); //Random number to decide what resource
                     if (randomNum == 0)
                     {
-                        Instantiate(resource2, resourcePosition, Quaternion.identity); // 1 in 10 chance of instantating rarer resource
+                        Instantiate(resource2, resourcePosition, Quaternion.identity,ResourceParent.transform); // 1 in 10 chance of instantating rarer resource
                     }
-                    else Instantiate(resource1, resourcePosition, Quaternion.identity); // 9 in 10 chance of instantiating common resource
+                    else Instantiate(resource1, resourcePosition, Quaternion.identity, ResourceParent.transform); // 9 in 10 chance of instantiating common resource
                 }
+
                 /*
                         RaycastHit raycastHit;
 

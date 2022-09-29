@@ -29,12 +29,14 @@ public class ResourceObject : MonoBehaviour
 
     private bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction or enemy and player interacting with same resource
 
+    private GameManager gameManager;
     //private GameObject playerObject; //To be inhabited by player/enemy when entering collider to access functionality/variables
 
     // Start is called before the first frame update
     void Start()
     {
-
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager.ResourceObjects.Add(gameObject);
     }
 
     // Update is called once per frame

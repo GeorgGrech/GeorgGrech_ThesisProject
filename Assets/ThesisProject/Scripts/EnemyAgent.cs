@@ -13,33 +13,70 @@ using Pathfinding;
 public class EnemyAgent : Agent
 {
     public EnemyPlayer enemyPlayer;
+    public Transform enemyBase;
+    public Transform targetResource;
     //public Transform target;
     // Start is called before the first frame update
     void Start()
     {
         //playerScript = gameObject.GetComponent<ParentPlayer>();
         enemyPlayer = gameObject.AddComponent<EnemyPlayer>();
+        enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").transform;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        //Interact();
-
-        //Test method. Be sure to remove.
+        //A* Test method. Be sure to remove.
         AStarTest();
     }
 
-    void Interact()
+    public void GatherResource()
     {
-        //playerScript.Interact();
+        // 1. Set target to resourceObject
+        enemyPlayer.GoToDestination(targetResource);
+        // 2. Detect Destination Reached
+
+        // 3. Interact with item
+        enemyPlayer.Interact();
+
+        // 4. Wait until completion or interruption
     }
 
-    void MoveToTarget(Transform target)
+    public void ReturnToBase()
     {
+        // 1. Set target to base
+        enemyPlayer.GoToDestination(enemyBase);
+        // 2. Detect Destination Reached
 
+        // 3. Interact with item
+        enemyPlayer.Interact();
+
+        // 4. Wait until completion
     }
+
+    /*
+    public Transform DestinationFinder()
+    {
+        //Find destination
+        return null;
+    }*/
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        /* Observations to collect
+         * -(All resources) Distance from enemy
+         * -(All resources) Distance from base
+         * -(ALl resources) Type of resource
+         */
+
+        /*
+        sensor.AddObservation(targetResource.localPosition); // Position of target resource
+        sensor.AddObservation(enemyBase.transform.localPosition); // Position of enemy base
+        sensor.AddObservation(this.transform.localPosition); // Position of enemy
+        */
+    }
+
 
     /// <summary>
     /// Test variable and method to check A* functionality. Remove or comment later.
