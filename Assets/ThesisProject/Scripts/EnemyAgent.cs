@@ -10,11 +10,27 @@ using Pathfinding;
 /// EnemyAgent class, inheritng base ML Agent class, to handle all decisions and direct actions, including ones from ParentPlayer class
 /// that may be grouped together as one action (i.e "Go to base" that includes setting target to base and interacting)
 /// </summary>
+
+public class ResourceData
+{
+    public GameObject resourceObject;
+    public string type;
+    public float distanceFromPlayer;
+    public float distanceFromBase;
+}
+
+
 public class EnemyAgent : Agent
 {
-    public EnemyPlayer enemyPlayer;
-    public Transform enemyBase;
-    public Transform targetResource;
+    private EnemyPlayer enemyPlayer;
+    private Transform enemyBase;
+    private Transform targetResource;
+
+    private GameManager gameManager;
+
+    private List<ResourceData> resourcesTrackingList;
+    private List<GameObject> resourceObjects;
+
     //public Transform target;
     // Start is called before the first frame update
     void Start()
@@ -22,6 +38,8 @@ public class EnemyAgent : Agent
         //playerScript = gameObject.GetComponent<ParentPlayer>();
         enemyPlayer = gameObject.AddComponent<EnemyPlayer>();
         enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").transform;
+
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -31,26 +49,54 @@ public class EnemyAgent : Agent
         AStarTest();
     }
 
+    public void PopulateTrackingList()
+    {
+        foreach (GameObject resourceObject in gameManager.ResourceObjects)
+        {
+            resourcesTrackingList.Add(new ResourceData()
+            {
+                resourceObject = resourceObject,
+                //Save type
+                type = resourceObject.GetComponent<ResourceObject>().resourceDropped.name
+
+            });
+        }
+    }
+
+    public void UpdateTrackingDistances()
+    {
+        foreach (ResourceData resourceData in resourcesTrackingList)
+        {
+            Vector3 resourcePosition = resourceData.resourceObject.transform.position;
+
+            //Distances are currently calculated with Vector3.distance, it would be ideal to calculate using potential A* path length
+            resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
+            resourceData.distanceFromPlayer = Vector3.Distance(resourcePosition, transform.position);
+        }
+    }
+
     public void GatherResource()
     {
+        StartCoroutine(enemyPlayer.GoToDestination(targetResource));
+
         // 1. Set target to resourceObject
-        enemyPlayer.GoToDestination(targetResource);
+
         // 2. Detect Destination Reached
 
         // 3. Interact with item
-        enemyPlayer.Interact();
 
         // 4. Wait until completion or interruption
     }
 
     public void ReturnToBase()
     {
+        StartCoroutine(enemyPlayer.GoToDestination(enemyBase));
+
         // 1. Set target to base
-        enemyPlayer.GoToDestination(enemyBase);
+
         // 2. Detect Destination Reached
 
         // 3. Interact with item
-        enemyPlayer.Interact();
 
         // 4. Wait until completion
     }
@@ -88,7 +134,7 @@ public class EnemyAgent : Agent
         if(!player)
             player = GameObject.Find("Player").transform;
         else
-            enemyPlayer.GoToDestination(player);
+            StartCoroutine(enemyPlayer.GoToDestination(player));
     }
 }
 
@@ -110,7 +156,7 @@ public class EnemyPlayer : ParentPlayer
         
         destinationSetter = GetComponent<AIDestinationSetter>();
         aiPath = GetComponent<AIPath>();
-
+        
         //Set correctly later so aiPath.maxSpeed updates with base.movementSpeed
         aiPath.maxSpeed = base.movementSpeed;
 
@@ -121,8 +167,19 @@ public class EnemyPlayer : ParentPlayer
         base.Interact();
     }
 
-    public void GoToDestination(Transform destination)
+    public IEnumerator GoToDestination(Transform destination)
     {
-        destinationSetter.target = destination;
+        //destinationSetter.target = destination;
+        aiPath.destination = destination.position;
+        //ai.SearchPath();
+        while (!aiPath.reachedDestination)
+        {
+            yield return null;
+        }
+
+        Interact();
+
+        //Yield wait 
     }
+
 }
