@@ -297,9 +297,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  enemyPlayer: {fileID: 0}
-  enemyBase: {fileID: 0}
-  targetResource: {fileID: 0}
 --- !u!54 &4381368502671526406
 Rigidbody:
   m_ObjectHideFlags: 0

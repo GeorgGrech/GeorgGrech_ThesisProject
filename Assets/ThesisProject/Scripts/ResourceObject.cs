@@ -1,3 +1,4 @@
+using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,9 +33,16 @@ public class ResourceObject : MonoBehaviour
     private GameManager gameManager;
     //private GameObject playerObject; //To be inhabited by player/enemy when entering collider to access functionality/variables
 
+    //A* Components
+    private AIPath aiPath;
+    private Seeker seeker;
+
     // Start is called before the first frame update
     void Start()
     {
+        aiPath = GetComponent<AIPath>();
+        seeker = GetComponent<Seeker>();
+
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gameManager.ResourceObjects.Add(gameObject);
     }
@@ -113,4 +121,20 @@ public class ResourceObject : MonoBehaviour
             StartCoroutine(GiveResources(playerObject));
     }
 
+    //A* methods to be used by Agent determining distance between resource and base
+
+    public float CalculateAStarDistance(Vector3 itemPosition)
+    {
+        EnableAStar(true);
+        aiPath.destination = itemPosition;
+        float pathDistance = aiPath.remainingDistance;
+        EnableAStar(true);
+        return pathDistance;
+    }
+
+    private void EnableAStar(bool enable)
+    {
+        aiPath.enabled = enable;
+        seeker.enabled = enable;
+    }
 }

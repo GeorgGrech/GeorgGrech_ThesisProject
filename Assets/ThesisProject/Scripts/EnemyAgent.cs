@@ -69,9 +69,15 @@ public class EnemyAgent : Agent
         {
             Vector3 resourcePosition = resourceData.resourceObject.transform.position;
 
-            //Distances are currently calculated with Vector3.distance, it would be ideal to calculate using potential A* path length
-            resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
+            /*
+            // Vector3 distance method
             resourceData.distanceFromPlayer = Vector3.Distance(resourcePosition, transform.position);
+            resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
+            */
+                       
+            // A* Path distance method
+            resourceData.distanceFromPlayer = enemyPlayer.CalculateAStarDistance(resourcePosition);
+            resourceData.distanceFromBase = resourceData.resourceObject.GetComponent<ResourceObject>().CalculateAStarDistance(enemyBase.position);
         }
     }
 
@@ -180,6 +186,14 @@ public class EnemyPlayer : ParentPlayer
         Interact();
 
         //Yield wait 
+    }
+
+    public float CalculateAStarDistance(Vector3 objectToCheck)
+    {
+        //1. Briefly set object to check as A* destination
+        aiPath.destination = objectToCheck;
+        //2. Return distance as float
+        return aiPath.remainingDistance;
     }
 
 }
