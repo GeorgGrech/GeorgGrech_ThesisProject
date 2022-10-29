@@ -28,8 +28,8 @@ public class EnemyAgent : Agent
 
     private GameManager gameManager;
 
-    private List<ResourceData> resourcesTrackingList;
-    private List<GameObject> resourceObjects;
+    public List<ResourceData> resourcesTrackingList;
+    //private List<GameObject> resourceObjects;
 
     //public Transform target;
     // Start is called before the first frame update
@@ -40,6 +40,8 @@ public class EnemyAgent : Agent
         enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").transform;
 
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+        //PopulateTrackingList();
     }
 
     // Update is called once per frame
@@ -49,37 +51,53 @@ public class EnemyAgent : Agent
         AStarTest();
     }
 
-    public void PopulateTrackingList()
+    
+    [ContextMenu("Update Distances")]
+    public void GetTrackingList()
     {
+        gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
+
+        resourcesTrackingList = new List<ResourceData>();
         foreach (GameObject resourceObject in gameManager.ResourceObjects)
         {
             resourcesTrackingList.Add(new ResourceData()
             {
                 resourceObject = resourceObject,
                 //Save type
-                type = resourceObject.GetComponent<ResourceObject>().resourceDropped.name
+                type = resourceObject.GetComponent<ResourceObject>().resourceDropped.name,
+                distanceFromPlayer = enemyPlayer.CalculateAStarDistance(resourceObject.transform.position),
+                distanceFromBase = resourceObject.GetComponent<ResourceObject>().CalculateAStarDistance(enemyBase.position)
 
             });
         }
-    }
 
+        //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
+        foreach(ResourceData resourceData in resourcesTrackingList)
+        {
+            Debug.Log("ResourceData added- Type: " + resourceData.type +
+                " DistFromPlayer: " + resourceData.distanceFromPlayer +
+                " DistFromBase: " + resourceData.distanceFromBase);
+        }
+    }
+    
+    /*
     public void UpdateTrackingDistances()
     {
         foreach (ResourceData resourceData in resourcesTrackingList)
         {
             Vector3 resourcePosition = resourceData.resourceObject.transform.position;
 
-            /*
+            
             // Vector3 distance method
-            resourceData.distanceFromPlayer = Vector3.Distance(resourcePosition, transform.position);
-            resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
-            */
+            //resourceData.distanceFromPlayer = Vector3.Distance(resourcePosition, transform.position);
+            //resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
+            
                        
             // A* Path distance method
             resourceData.distanceFromPlayer = enemyPlayer.CalculateAStarDistance(resourcePosition);
             resourceData.distanceFromBase = resourceData.resourceObject.GetComponent<ResourceObject>().CalculateAStarDistance(enemyBase.position);
         }
-    }
+    }*/
 
     public void GatherResource()
     {

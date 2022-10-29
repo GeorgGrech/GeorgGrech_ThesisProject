@@ -128,7 +128,7 @@ public class ResourceObject : MonoBehaviour
         EnableAStar(true);
         aiPath.destination = itemPosition;
         float pathDistance = aiPath.remainingDistance;
-        EnableAStar(true);
+        EnableAStar(false);
         return pathDistance;
     }
 

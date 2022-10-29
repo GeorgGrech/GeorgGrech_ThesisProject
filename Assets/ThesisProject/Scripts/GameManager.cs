@@ -18,4 +18,9 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+    public void ClearNullValues()
+    {
+        ResourceObjects.RemoveAll(s => s == null);
+    }
 }
