@@ -2,6 +2,7 @@ using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 /// <summary>
@@ -34,14 +35,16 @@ public class ResourceObject : MonoBehaviour
     //private GameObject playerObject; //To be inhabited by player/enemy when entering collider to access functionality/variables
 
     //A* Components
-    private AIPath aiPath;
-    private Seeker seeker;
+    //private AIPath aiPath;
+    //private Seeker seeker;
+    private NavMeshAgent navmeshAgent;
 
     // Start is called before the first frame update
     void Start()
     {
-        aiPath = GetComponent<AIPath>();
-        seeker = GetComponent<Seeker>();
+        //aiPath = GetComponent<AIPath>();
+        //seeker = GetComponent<Seeker>();
+        navmeshAgent = GetComponent<NavMeshAgent>();
 
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gameManager.ResourceObjects.Add(gameObject);
@@ -121,20 +124,28 @@ public class ResourceObject : MonoBehaviour
             StartCoroutine(GiveResources(playerObject));
     }
 
-    //A* methods to be used by Agent determining distance between resource and base
+    //nav methods methods to be used by Agent determining distance between resource and base
 
-    public float CalculateAStarDistance(Vector3 itemPosition)
+    //copy of GetPathRemainingDistance in EnemyAgent
+    public float GetPathRemainingDistance()
     {
-        EnableAStar(true);
-        aiPath.destination = itemPosition;
-        float pathDistance = aiPath.remainingDistance;
-        EnableAStar(false);
-        return pathDistance;
+        //EnableNavAgent(true);
+        if (navmeshAgent.pathPending ||
+            navmeshAgent.pathStatus == NavMeshPathStatus.PathInvalid ||
+            navmeshAgent.path.corners.Length == 0)
+            return -1f;
+
+        float distance = 0.0f;
+        for (int i = 0; i < navmeshAgent.path.corners.Length - 1; ++i)
+        {
+            distance += Vector3.Distance(navmeshAgent.path.corners[i], navmeshAgent.path.corners[i + 1]);
+        }
+        //EnableNavAgent(false);
+        return distance;
     }
 
-    private void EnableAStar(bool enable)
+    private void EnableNavAgent(bool enable)
     {
-        aiPath.enabled = enable;
-        seeker.enabled = enable;
+        navmeshAgent.enabled = enable;
     }
 }

@@ -30,7 +30,10 @@ public class EnemyAgentNavmesh : Agent
     private GameManager gameManager;
 
     public List<ResourceData> resourcesTrackingList;
+
     private NavMeshAgent navmeshAgent;
+    public NavMeshSurface navmeshSurface; //Terrain navmesh for rebaking navmesh when necessary
+
     //private List<GameObject> resourceObjects;
 
     //public Transform target;
@@ -44,6 +47,8 @@ public class EnemyAgentNavmesh : Agent
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
         navmeshAgent = GetComponent<NavMeshAgent>();
+
+        navmeshSurface = GameObject.Find("Terrain").GetComponent<NavMeshSurface>();
         //PopulateTrackingList();
     }
 
@@ -63,20 +68,30 @@ public class EnemyAgentNavmesh : Agent
 
     public IEnumerator GetTrackingList()
     {
+        navmeshSurface.BuildNavMesh(); //Rebuild navmesh
+
         gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
 
         resourcesTrackingList = new List<ResourceData>();
         foreach (GameObject resourceObject in gameManager.ResourceObjects)
         {
-            navmeshAgent.destination = resourceObject.transform.position;
-
-            while(GetPathRemainingDistance() == -1)
+            //1. Save distance from player to resource
+            navmeshAgent.destination = resourceObject.transform.position; //Assign resource as agent target
+            while(GetPathRemainingDistance() == -1) //Keep trying until value is valid
             {
                 yield return null;
             }
-
             float distanceFromPlayer = GetPathRemainingDistance();
+
+            //2. Save distance from resource to base
+            ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
+            resourceObject.GetComponent<NavMeshAgent>().destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
+            while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
+            {
+                yield return null;
+            }
+            float distanceFromBase = objectScript.GetPathRemainingDistance();
 
             resourcesTrackingList.Add(new ResourceData()
             {
@@ -84,7 +99,7 @@ public class EnemyAgentNavmesh : Agent
                 //Save type
                 type = resourceObject.GetComponent<ResourceObject>().resourceDropped.name,
                 distanceFromPlayer = distanceFromPlayer,
-                distanceFromBase = resourceObject.GetComponent<ResourceObject>().CalculateAStarDistance(enemyBase.position)
+                distanceFromBase = distanceFromBase
 
             });
         }
@@ -216,6 +231,7 @@ public class EnemyPlayer : ParentPlayer
         base.Start();
         navmeshAgent = GetComponent<NavMeshAgent>();
 
+        navmeshAgent.speed = movementSpeed;
 
     }
 
