@@ -147,17 +147,26 @@ public class EnemyAgent : Agent
         return distance;
     }
 
-    public void GatherResource(Transform targetResource)
+    public IEnumerator GatherResource(Transform targetResource)
     {
+        // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
 
-        // 1. Set target to resourceObject
-
         // 2. Detect Destination Reached
+        while (!enemyPlayer.destinationReached)
+        {
+            yield return null;
+        }
 
         // 3. Interact with item
+        //Included in GoToDestination
 
         // 4. Wait until completion or interruption
+        while (!enemyPlayer.playerInteracting)
+        {
+            yield return null;
+        }
+        Debug.Log("Action completed. Interaction successful or interrupted");
     }
 
     public void ReturnToBase()
@@ -204,7 +213,7 @@ public class EnemyAgent : Agent
 
     }
 
-
+#region testing methods
     /// <summary>
     /// Test variable and method to check seeking and interact functionality. Remove or comment later.
     /// </summary>
@@ -219,7 +228,15 @@ public class EnemyAgent : Agent
 
         StartCoroutine(enemyPlayer.GoToDestination(player));
     }
+
+    [ContextMenu("Gather Random Resource")]
+    void GatherRandomResource()
+    {
+        Transform target = resourcesTrackingList[Random.Range(0, resourcesTrackingList.Count)].resourceObject.transform;
+        StartCoroutine(GatherResource(target));
+    }
 }
+#endregion
 
 /// <summary>
 /// EnemyPlayer class, inheriting ParentPlayer script, to handle basic actions such as Interaction as well as inventory management.
@@ -236,6 +253,7 @@ public class EnemyPlayer : ParentPlayer
     */
 
     private NavMeshAgent navmeshAgent;
+    public bool destinationReached = false;
     protected override void Start()
     {
         base.Start();
@@ -266,7 +284,7 @@ public class EnemyPlayer : ParentPlayer
 
         navmeshAgent.destination = destination.position;
 
-        bool destinationReached = false;
+        destinationReached = false;
 
         while (!destinationReached)
         {

@@ -79,8 +79,12 @@ public class ResourceObject : MonoBehaviour
             playerScript = playerObject.GetComponent<HumanPlayer>();
         }
         //else condition to get enemy script
+        else
+        {
+            playerScript = playerObject.GetComponent<EnemyPlayer>();
+        }
 
-
+        playerScript.playerInteracting = playerInteracting;
 
         int deposited; //Keep track of amount deposited to subtract from dropAmount in case of operation cancel
         //Add line for enemyPlayerScript
@@ -115,6 +119,7 @@ public class ResourceObject : MonoBehaviour
         }
 
         playerInteracting = false;
+        playerScript.playerInteracting = playerInteracting;
     }
 
     void InteractAction(GameObject playerObject)

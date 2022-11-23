@@ -15,9 +15,9 @@ public class ParentPlayer : MonoBehaviour
 
     public int score = 0; //Total score
 
-    private bool playerInteracting;
+    public bool playerInteracting; //Curewntly interacting with an object;
 
-    private GameObject interactableObject; //object to interact with (resource/base)
+    public GameObject interactableObject; //object to interact with (resource/base)
 
     [SerializeField] protected float movementSpeed; //To be used in charactercontroller for human player and A* scripts for AI player
     [SerializeField] protected float defaultMovementSpeed = 5; //To be used in charactercontroller for human player and A* scripts for AI player
