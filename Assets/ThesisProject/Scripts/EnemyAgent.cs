@@ -25,7 +25,7 @@ public class EnemyAgent : Agent
 {
     private EnemyPlayer enemyPlayer;
     private Transform enemyBase;
-    private Transform targetResource;
+    //private Transform targetResource;
 
     private GameManager gameManager;
 
@@ -55,8 +55,7 @@ public class EnemyAgent : Agent
     // Update is called once per frame
     void Update()
     {
-        //A* Test method. Be sure to remove.
-        AStarTest();
+        
     }
 
 
@@ -148,7 +147,7 @@ public class EnemyAgent : Agent
         return distance;
     }
 
-    public void GatherResource()
+    public void GatherResource(Transform targetResource)
     {
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
 
@@ -194,20 +193,31 @@ public class EnemyAgent : Agent
         sensor.AddObservation(enemyBase.transform.localPosition); // Position of enemy base
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
+
+        foreach(ResourceData resourceData in resourcesTrackingList)
+        {
+            sensor.AddObservation(resourceData.distanceFromBase);
+            sensor.AddObservation(resourceData.distanceFromPlayer);
+            //sensor.AddObservation(resourceData.type); 
+        }
+        sensor.AddObservation(this.transform.localPosition);
+
     }
 
 
     /// <summary>
-    /// Test variable and method to check A* functionality. Remove or comment later.
+    /// Test variable and method to check seeking and interact functionality. Remove or comment later.
     /// </summary>
 
     Transform player;
-    void AStarTest()
+    [ContextMenu("Find and Interact with Player")]
+
+    void GoToPlayer()
     {
         if (!player)
             player = GameObject.Find("Player").transform;
-        else
-            StartCoroutine(enemyPlayer.GoToDestination(player));
+
+        StartCoroutine(enemyPlayer.GoToDestination(player));
     }
 }
 
@@ -253,16 +263,29 @@ public class EnemyPlayer : ParentPlayer
 
         Interact();
         */
-        yield return null;
+
+        navmeshAgent.destination = destination.position;
+
+        bool destinationReached = false;
+
+        while (!destinationReached)
+        {
+            if (!navmeshAgent.pathPending)
+            {
+                if (navmeshAgent.remainingDistance <= navmeshAgent.stoppingDistance)
+                {
+                    if (!navmeshAgent.hasPath || navmeshAgent.velocity.sqrMagnitude == 0f)
+                    {
+                        destinationReached = true;
+                    }
+                    else yield return null;
+                }
+                else yield return null;
+            }
+            else yield return null;
+        }
+
+        Interact();
     }
-
-
-    /*public float CalculatePathDistance(Vector3 objectToCheck)
-    {
-        //1. Briefly set object to check as A* destination
-        navmeshAgent.destination = objectToCheck;
-        //2. Return distance as float
-        return navmeshAgent.remainingDistance;
-    }*/
 
 }
