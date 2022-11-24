@@ -42,6 +42,12 @@ public class Base : MonoBehaviour
             playerScript = playerObject.GetComponent<HumanPlayer>();
         }
         //else condition to get enemy script
+        else
+        {
+            playerScript = playerObject.GetComponent<EnemyPlayer>();
+        }
+
+        playerScript.playerInteracting = playerInteracting;
 
         playerScript.PauseMovement();
 
@@ -54,6 +60,7 @@ public class Base : MonoBehaviour
         playerScript.ResetInventory();
         playerScript.ResumeMovement();
         playerInteracting = false;
+        playerScript.playerInteracting = playerInteracting;
     }
 
     void InteractAction(GameObject playerObject)

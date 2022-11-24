@@ -112,25 +112,6 @@ public class EnemyAgent : Agent
         }
     }
 
-    /*
-    public void UpdateTrackingDistances()
-    {
-        foreach (ResourceData resourceData in resourcesTrackingList)
-        {
-            Vector3 resourcePosition = resourceData.resourceObject.transform.position;
-
-            
-            // Vector3 distance method
-            //resourceData.distanceFromPlayer = Vector3.Distance(resourcePosition, transform.position);
-            //resourceData.distanceFromBase = Vector3.Distance(resourcePosition, enemyBase.position);
-            
-                       
-            // A* Path distance method
-            resourceData.distanceFromPlayer = enemyPlayer.CalculateAStarDistance(resourcePosition);
-            resourceData.distanceFromBase = resourceData.resourceObject.GetComponent<ResourceObject>().CalculateAStarDistance(enemyBase.position);
-        }
-    }*/
-
     public float GetPathRemainingDistance()
     {
         if (navmeshAgent.pathPending ||
@@ -147,6 +128,11 @@ public class EnemyAgent : Agent
         return distance;
     }
 
+    /// <summary>
+    /// Action taken by agent to gather a resource. Goes to resource, interacts, and concludes once gathering is finished or interrupted. targetResource is a parameter that may be chosen via a method that handles selection. Penalization may occur (TBD).
+    /// </summary>
+    /// <param name="targetResource"></param>
+    /// <returns></returns>
     public IEnumerator GatherResource(Transform targetResource)
     {
         // 1. Set target to resourceObject
@@ -162,24 +148,37 @@ public class EnemyAgent : Agent
         //Included in GoToDestination
 
         // 4. Wait until completion or interruption
-        while (!enemyPlayer.playerInteracting)
+        while (enemyPlayer.playerInteracting)
         {
             yield return null;
         }
-        Debug.Log("Action completed. Interaction successful or interrupted");
+        Debug.Log("Action completed. Interaction successful or interrupted.");
     }
 
-    public void ReturnToBase()
+
+    /// <summary>
+    /// Action taken by agent to return to base and deposit resources. Goes to base, interacts, and concludes once all items deposited. Action will reward based on points recieved from resource. Penalization will occur based on amount of inventory still unoccupied when depositing. 
+    /// </summary>
+    public IEnumerator ReturnToBase()
     {
+        // 1. Set target to base
         StartCoroutine(enemyPlayer.GoToDestination(enemyBase));
 
-        // 1. Set target to base
-
         // 2. Detect Destination Reached
+        while (!enemyPlayer.destinationReached)
+        {
+            yield return null;
+        }
 
         // 3. Interact with item
+        //Included in GoToDestination
 
         // 4. Wait until completion
+        while (enemyPlayer.playerInteracting)
+        {
+            yield return null;
+        }
+        Debug.Log("Action completed. Items deposited at base.");
     }
 
     /*
@@ -220,7 +219,6 @@ public class EnemyAgent : Agent
 
     Transform player;
     [ContextMenu("Find and Interact with Player")]
-
     void GoToPlayer()
     {
         if (!player)
@@ -232,8 +230,14 @@ public class EnemyAgent : Agent
     [ContextMenu("Gather Random Resource")]
     void GatherRandomResource()
     {
-        Transform target = resourcesTrackingList[Random.Range(0, resourcesTrackingList.Count)].resourceObject.transform;
+        Transform target = gameManager.ResourceObjects[Random.Range(0, gameManager.ResourceObjects.Count)].transform;
         StartCoroutine(GatherResource(target));
+    }
+
+    [ContextMenu("Return to Base and Deposit")]
+    void ReturnToBaseMethod()
+    {
+        StartCoroutine(ReturnToBase());
     }
 }
 #endregion
