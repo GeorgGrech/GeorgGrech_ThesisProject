@@ -37,14 +37,14 @@ public class ResourceObject : MonoBehaviour
     //A* Components
     //private AIPath aiPath;
     //private Seeker seeker;
-    private NavMeshAgent navmeshAgent;
+    public NavMeshAgent navmeshAgent;
 
     // Start is called before the first frame update
     void Start()
     {
         //aiPath = GetComponent<AIPath>();
         //seeker = GetComponent<Seeker>();
-        navmeshAgent = GetComponent<NavMeshAgent>();
+        navmeshAgent = GetComponentInChildren<NavMeshAgent>();
 
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gameManager.ResourceObjects.Add(gameObject);

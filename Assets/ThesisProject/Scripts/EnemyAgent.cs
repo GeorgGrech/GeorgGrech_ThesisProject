@@ -71,6 +71,8 @@ public class EnemyAgent : Agent
 
         gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
+        int resourceCounter = 0; //Used to for debugging by tracking progress
+        int resourceAmount = gameManager.ResourceObjects.Count;
 
         resourcesTrackingList = new List<ResourceData>();
         foreach (GameObject resourceObject in gameManager.ResourceObjects)
@@ -85,7 +87,7 @@ public class EnemyAgent : Agent
 
             //2. Save distance from resource to base
             ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
-            resourceObject.GetComponent<NavMeshAgent>().destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
+            objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
             while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
             {
                 yield return null;
@@ -101,6 +103,8 @@ public class EnemyAgent : Agent
                 distanceFromBase = distanceFromBase
 
             });
+            resourceCounter++;
+            Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
         }
 
         //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
@@ -231,6 +235,7 @@ public class EnemyAgent : Agent
     void GatherRandomResource()
     {
         Transform target = gameManager.ResourceObjects[Random.Range(0, gameManager.ResourceObjects.Count)].transform;
+        Debug.Log("Test target: " + target.name+" at position: "+target.position);
         StartCoroutine(GatherResource(target));
     }
 

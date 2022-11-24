@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2371791570592972919}
   - component: {fileID: 3823532189659043665}
   - component: {fileID: 8685068545556620096}
+  - component: {fileID: 6300306696435902270}
   m_Layer: 0
   m_Name: PlayerBasePlaceholder
   m_TagString: PlayerBase
@@ -124,3 +125,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   depositTime: 3
+--- !u!208 &6300306696435902270
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507343056718839266}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
