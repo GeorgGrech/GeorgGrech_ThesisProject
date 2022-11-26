@@ -68,7 +68,7 @@ GameObject:
   - component: {fileID: 2006462431857625119}
   - component: {fileID: 5124706536694132468}
   - component: {fileID: 1100985522431259090}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Resource2Placeholder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

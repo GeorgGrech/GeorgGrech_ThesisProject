@@ -29,7 +29,7 @@ public class EnemyAgent : Agent
 
     private GameManager gameManager;
 
-    public List<ResourceData> resourcesTrackingList;
+    public List<ResourceData> resourcesTrackingList; //Scanned list including all distances to enemy and base
 
     private NavMeshAgent navmeshAgent;
     public NavMeshSurface navmeshSurface; //Terrain navmesh for rebaking navmesh when necessary
@@ -49,6 +49,7 @@ public class EnemyAgent : Agent
         navmeshAgent = GetComponent<NavMeshAgent>();
 
         navmeshSurface = GameObject.Find("Terrain").GetComponent<NavMeshSurface>();
+
         //PopulateTrackingList();
     }
 
@@ -71,22 +72,33 @@ public class EnemyAgent : Agent
 
         gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
+        Collider[] hits = new Collider[0];
+        int scanRange = 20;
+
+        while (hits.Length == 0)
+        {
+            hits = Physics.OverlapSphere(transform.position, scanRange, 1<<6); //Get resources within range, and only in "Resource" layer
+            scanRange += 10; //if no objects detected in range, increase range
+        }
+        //Debug.Log("Hits: " +hits.Length);
+
         int resourceCounter = 0; //Used to for debugging by tracking progress
-        int resourceAmount = gameManager.ResourceObjects.Count;
+        int resourceAmount = hits.Length;
 
         resourcesTrackingList = new List<ResourceData>();
-        foreach (GameObject resourceObject in gameManager.ResourceObjects)
+
+        foreach (Collider collider in hits)
         {
             //1. Save distance from player to resource
-            navmeshAgent.destination = resourceObject.transform.position; //Assign resource as agent target
-            while(GetPathRemainingDistance() == -1) //Keep trying until value is valid
+            navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
+            while (GetPathRemainingDistance() == -1) //Keep trying until value is valid
             {
                 yield return null;
             }
             float distanceFromPlayer = GetPathRemainingDistance();
 
             //2. Save distance from resource to base
-            ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
+            ResourceObject objectScript = collider.gameObject.GetComponent<ResourceObject>();
             objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
             while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
             {
@@ -96,9 +108,9 @@ public class EnemyAgent : Agent
 
             resourcesTrackingList.Add(new ResourceData()
             {
-                resourceObject = resourceObject,
+                resourceObject = collider.gameObject,
                 //Save type
-                type = resourceObject.GetComponent<ResourceObject>().resourceDropped.name,
+                type = collider.GetComponent<ResourceObject>().resourceDropped.name,
                 distanceFromPlayer = distanceFromPlayer,
                 distanceFromBase = distanceFromBase
 
@@ -206,13 +218,13 @@ public class EnemyAgent : Agent
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
 
-        foreach(ResourceData resourceData in resourcesTrackingList)
+        /*foreach(ResourceData resourceData in resourcesTrackingList)
         {
             sensor.AddObservation(resourceData.distanceFromBase);
             sensor.AddObservation(resourceData.distanceFromPlayer);
             //sensor.AddObservation(resourceData.type); 
         }
-        sensor.AddObservation(this.transform.localPosition);
+        sensor.AddObservation(this.transform.localPosition);*/
 
     }
 
