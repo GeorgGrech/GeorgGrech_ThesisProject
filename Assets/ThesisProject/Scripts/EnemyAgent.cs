@@ -15,7 +15,9 @@ using UnityEngine.AI;
 public class ResourceData
 {
     public GameObject resourceObject;
-    public string type;
+    //public string type; //type needs to be set to some type of number for compatibility with ML
+    public Resource.Type type; //Enum type, Wood or Iron
+    public int numOfTypes = (int)Resource.Type.LastItem;
     public float distanceFromPlayer;
     public float distanceFromBase;
 }
@@ -56,7 +58,7 @@ public class EnemyAgent : Agent
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
 
@@ -110,7 +112,7 @@ public class EnemyAgent : Agent
             {
                 resourceObject = collider.gameObject,
                 //Save type
-                type = collider.GetComponent<ResourceObject>().resourceDropped.name,
+                type = collider.GetComponent<ResourceObject>().resourceDropped.resourceType,
                 distanceFromPlayer = distanceFromPlayer,
                 distanceFromBase = distanceFromBase
 
@@ -197,13 +199,7 @@ public class EnemyAgent : Agent
         Debug.Log("Action completed. Items deposited at base.");
     }
 
-    /*
-    public Transform DestinationFinder()
-    {
-        //Find destination
-        return null;
-    }*/
-
+    #region Agent methods
     public override void CollectObservations(VectorSensor sensor)
     {
         /* Observations to collect
@@ -218,17 +214,33 @@ public class EnemyAgent : Agent
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
 
-        /*foreach(ResourceData resourceData in resourcesTrackingList)
+        foreach(ResourceData resourceData in resourcesTrackingList)
         {
             sensor.AddObservation(resourceData.distanceFromBase);
             sensor.AddObservation(resourceData.distanceFromPlayer);
-            //sensor.AddObservation(resourceData.type); 
+            sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes); 
         }
-        sensor.AddObservation(this.transform.localPosition);*/
+        sensor.AddObservation(this.transform.localPosition);
 
     }
 
-#region testing methods
+    public override void OnActionReceived(ActionBuffers actionBuffers)
+    {
+        int gatherOrReturn = actionBuffers.DiscreteActions[0];
+        int resourceIndex = actionBuffers.DiscreteActions[1];
+
+        if (gatherOrReturn == 1) Debug.Log("Gather Resource");
+        if (gatherOrReturn == 2) Debug.Log("Return to base");
+    }
+
+    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
+    {
+        
+    }
+
+    #endregion
+
+    #region testing methods
     /// <summary>
     /// Test variable and method to check seeking and interact functionality. Remove or comment later.
     /// </summary>

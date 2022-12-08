@@ -14,6 +14,16 @@ using UnityEngine.AI;
 public class Resource
 {
     public string name; //name of the resource, i.e "Wood" or "Iron"
+
+    public enum Type
+    {
+        Wood,
+        Iron,
+        LastItem //Used solely as marker to determine enum range. Used in EnemyAgent.
+    }
+
+    public Type resourceType;
+
     public int points; //points given to player when resource deposited in base
     public int inventorySpaceTaken; //space taken up by resource in player inventory
 }

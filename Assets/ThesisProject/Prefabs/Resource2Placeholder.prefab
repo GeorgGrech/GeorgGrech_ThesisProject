@@ -183,6 +183,7 @@ MonoBehaviour:
   dropTime: 6
   resourceDropped:
     name: Iron
+    resourceType: 1
     points: 15
     inventorySpaceTaken: 4
   navmeshAgent: {fileID: 0}
