@@ -6,6 +6,8 @@ using UnityEditor;
 
 public class ItemSpawner : MonoBehaviour
 {
+    [SerializeField] private bool agentTrainingLevel = false; //if level is used for training
+
     //[SerializeField] private GameObject levelTerrainObject; //Level Terrain GameObject
     [SerializeField] private Terrain levelTerrain;
     private float terrainSizeX;
@@ -37,10 +39,14 @@ public class ItemSpawner : MonoBehaviour
         terrainSizeX = levelTerrain.terrainData.size.x;
         terrainSizeZ = levelTerrain.terrainData.size.z;
 
-        SpawnPlayerBase(); //Spawn Player Base
+        if (!agentTrainingLevel) //Don't attempt to relocate player and spawn player base if level is just for agent training 
+        {
+            SpawnPlayerBase(); //Spawn Player Base
+            RelocatePlayer(); //Move player to 
+        }
+
         SpawnEnemyBase(); //Spawn Enemy Base taking note of Player Base location
         SpawnResources(); //Spawn Resources
-        RelocatePlayer(); //Move player to base
         SpawnEnemy(); //Spawn Enemy near Enemy Base
 
     }

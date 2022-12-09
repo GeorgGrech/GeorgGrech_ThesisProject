@@ -52,6 +52,7 @@ public class EnemyAgent : Agent
 
         navmeshSurface = GameObject.Find("Terrain").GetComponent<NavMeshSurface>();
 
+        resourcesTrackingList = new List<ResourceData>();
         //PopulateTrackingList();
     }
 
@@ -214,14 +215,16 @@ public class EnemyAgent : Agent
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
 
-        foreach(ResourceData resourceData in resourcesTrackingList)
+        if (resourcesTrackingList.Count > 0)
         {
-            sensor.AddObservation(resourceData.distanceFromBase);
-            sensor.AddObservation(resourceData.distanceFromPlayer);
-            sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes); 
+            foreach (ResourceData resourceData in resourcesTrackingList)
+            {
+                sensor.AddObservation(resourceData.distanceFromBase);
+                sensor.AddObservation(resourceData.distanceFromPlayer);
+                sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
+            }
+            sensor.AddObservation(this.transform.localPosition);
         }
-        sensor.AddObservation(this.transform.localPosition);
-
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -231,6 +234,10 @@ public class EnemyAgent : Agent
 
         if (gatherOrReturn == 1) Debug.Log("Gather Resource");
         if (gatherOrReturn == 2) Debug.Log("Return to base");
+
+        if(resourceIndex == 1) Debug.Log("Resource 1");
+        if(resourceIndex == 2) Debug.Log("Resource 2");
+        if(resourceIndex == 3) Debug.Log("Resource 3");
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
