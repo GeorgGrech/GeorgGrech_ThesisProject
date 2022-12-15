@@ -53,6 +53,8 @@ public class EnemyAgent : Agent
         navmeshSurface = GameObject.Find("Terrain").GetComponent<NavMeshSurface>();
 
         resourcesTrackingList = new List<ResourceData>();
+
+        StartCoroutine(GetTrackingList());
         //PopulateTrackingList();
     }
 
@@ -122,6 +124,8 @@ public class EnemyAgent : Agent
             Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
         }
 
+        RequestDecision();
+
         //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
         foreach (ResourceData resourceData in resourcesTrackingList)
         {
@@ -172,6 +176,8 @@ public class EnemyAgent : Agent
             yield return null;
         }
         Debug.Log("Action completed. Interaction successful or interrupted.");
+
+        StartCoroutine(GetTrackingList());
     }
 
 
@@ -198,6 +204,8 @@ public class EnemyAgent : Agent
             yield return null;
         }
         Debug.Log("Action completed. Items deposited at base.");
+
+        StartCoroutine(GetTrackingList());
     }
 
     #region Agent methods
@@ -215,7 +223,7 @@ public class EnemyAgent : Agent
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
 
-        if (resourcesTrackingList.Count > 0)
+        if (resourcesTrackingList != null && resourcesTrackingList.Count > 0)
         {
             foreach (ResourceData resourceData in resourcesTrackingList)
             {
@@ -223,21 +231,29 @@ public class EnemyAgent : Agent
                 sensor.AddObservation(resourceData.distanceFromPlayer);
                 sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
             }
-            sensor.AddObservation(this.transform.localPosition);
+            //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
         }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        int gatherOrReturn = actionBuffers.DiscreteActions[0];
-        int resourceIndex = actionBuffers.DiscreteActions[1];
+        
+        int actionIndex = actionBuffers.DiscreteActions[0];
 
-        if (gatherOrReturn == 1) Debug.Log("Gather Resource");
-        if (gatherOrReturn == 2) Debug.Log("Return to base");
+        Debug.Log("Action Index: " + actionIndex);
 
-        if(resourceIndex == 1) Debug.Log("Resource 1");
-        if(resourceIndex == 2) Debug.Log("Resource 2");
-        if(resourceIndex == 3) Debug.Log("Resource 3");
+        if (actionIndex == 0) //0 means returns to base 
+        {
+            Debug.Log("Return to base");
+            StartCoroutine(ReturnToBase());
+        }
+            
+
+        else
+        {
+            Debug.Log("Going to gather resource " + (actionIndex - 1) + ": " + resourcesTrackingList[actionIndex - 1].type); //1 or greater, choose to gather a resource
+            StartCoroutine(GatherResource(resourcesTrackingList[actionIndex - 1].resourceObject.transform));
+        }
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
