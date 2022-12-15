@@ -32,9 +32,13 @@ public class EnemyAgent : Agent
     private GameManager gameManager;
 
     public List<ResourceData> resourcesTrackingList; //Scanned list including all distances to enemy and base
+    [SerializeField] private int initialScanRange; 
 
     private NavMeshAgent navmeshAgent;
     public NavMeshSurface navmeshSurface; //Terrain navmesh for rebaking navmesh when necessary
+
+    [Tooltip("Max size of Discrete Branch. Make sure it is equal to size of Branch 0 in Behaviour Parameters. Will be used to mask out unused actions when making a decision.")]
+    [SerializeField] private int maxBranchSize;
 
     //private List<GameObject> resourceObjects;
 
@@ -56,6 +60,8 @@ public class EnemyAgent : Agent
 
         StartCoroutine(GetTrackingList());
         //PopulateTrackingList();
+
+        
     }
 
     // Update is called once per frame
@@ -77,62 +83,70 @@ public class EnemyAgent : Agent
 
         gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
-        Collider[] hits = new Collider[0];
-        int scanRange = 20;
 
-        while (hits.Length == 0)
+        while(gameManager.ResourceObjects == null || gameManager.ResourceObjects.Count == 0) //Wait until resources are loaded
+        {
+            yield return null;
+        }
+
+        Collider[] hits = new Collider[0];
+        int scanRange = initialScanRange;
+
+        while (hits.Length == 0 && scanRange < 100) //Safety precaution: Stop scanning if nothing found up to range = 100
         {
             hits = Physics.OverlapSphere(transform.position, scanRange, 1<<6); //Get resources within range, and only in "Resource" layer
             scanRange += 10; //if no objects detected in range, increase range
         }
-        //Debug.Log("Hits: " +hits.Length);
 
-        int resourceCounter = 0; //Used to for debugging by tracking progress
-        int resourceAmount = hits.Length;
-
-        resourcesTrackingList = new List<ResourceData>();
-
-        foreach (Collider collider in hits)
+        if(hits.Length > 0) //Safety precaution, if nothing found after scanning, don't do anything
         {
-            //1. Save distance from player to resource
-            navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
-            while (GetPathRemainingDistance() == -1) //Keep trying until value is valid
+            int resourceCounter = 0; //Used to for debugging by tracking progress
+            int resourceAmount = hits.Length;
+
+            resourcesTrackingList = new List<ResourceData>();
+
+            foreach (Collider collider in hits)
             {
-                yield return null;
+                //1. Save distance from player to resource
+                navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
+                while (GetPathRemainingDistance() == -1) //Keep trying until value is valid
+                {
+                    yield return null;
+                }
+                float distanceFromPlayer = GetPathRemainingDistance();
+
+                //2. Save distance from resource to base
+                ResourceObject objectScript = collider.gameObject.GetComponent<ResourceObject>();
+                objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
+                while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
+                {
+                    yield return null;
+                }
+                float distanceFromBase = objectScript.GetPathRemainingDistance();
+
+                resourcesTrackingList.Add(new ResourceData()
+                {
+                    resourceObject = collider.gameObject,
+                    //Save type
+                    type = collider.GetComponent<ResourceObject>().resourceDropped.resourceType,
+                    distanceFromPlayer = distanceFromPlayer,
+                    distanceFromBase = distanceFromBase
+
+                });
+                resourceCounter++;
+                Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
             }
-            float distanceFromPlayer = GetPathRemainingDistance();
 
-            //2. Save distance from resource to base
-            ResourceObject objectScript = collider.gameObject.GetComponent<ResourceObject>();
-            objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
-            while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
+            RequestDecision(); //After getting list, request decision
+
+            //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
+            foreach (ResourceData resourceData in resourcesTrackingList)
             {
-                yield return null;
+                Debug.Log("ResourceData added- Type: " + resourceData.type +
+                    " DistFromPlayer: " + resourceData.distanceFromPlayer +
+                    " DistFromBase: " + resourceData.distanceFromBase);
             }
-            float distanceFromBase = objectScript.GetPathRemainingDistance();
-
-            resourcesTrackingList.Add(new ResourceData()
-            {
-                resourceObject = collider.gameObject,
-                //Save type
-                type = collider.GetComponent<ResourceObject>().resourceDropped.resourceType,
-                distanceFromPlayer = distanceFromPlayer,
-                distanceFromBase = distanceFromBase
-
-            });
-            resourceCounter++;
-            Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
-        }
-
-        RequestDecision();
-
-        //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
-        foreach (ResourceData resourceData in resourcesTrackingList)
-        {
-            Debug.Log("ResourceData added- Type: " + resourceData.type +
-                " DistFromPlayer: " + resourceData.distanceFromPlayer +
-                " DistFromBase: " + resourceData.distanceFromBase);
-        }
+        }   
     }
 
     public float GetPathRemainingDistance()
@@ -177,7 +191,7 @@ public class EnemyAgent : Agent
         }
         Debug.Log("Action completed. Interaction successful or interrupted.");
 
-        StartCoroutine(GetTrackingList());
+        StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
     }
 
 
@@ -205,7 +219,7 @@ public class EnemyAgent : Agent
         }
         Debug.Log("Action completed. Items deposited at base.");
 
-        StartCoroutine(GetTrackingList());
+        StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
     }
 
     #region Agent methods
@@ -247,18 +261,27 @@ public class EnemyAgent : Agent
             Debug.Log("Return to base");
             StartCoroutine(ReturnToBase());
         }
-            
 
-        else
+
+        else //1 or greater, choose to gather a resource
         {
-            Debug.Log("Going to gather resource " + (actionIndex - 1) + ": " + resourcesTrackingList[actionIndex - 1].type); //1 or greater, choose to gather a resource
+            Debug.Log("Going to gather resource " + (actionIndex - 1) + ": " + resourcesTrackingList[actionIndex - 1].type); 
             StartCoroutine(GatherResource(resourcesTrackingList[actionIndex - 1].resourceObject.transform));
         }
     }
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        
+        //int used = 0;
+        for (int i = 0; i < maxBranchSize; i++)
+        {
+            if(i >= resourcesTrackingList.Count+1) //Disable out of range unused branches
+            {
+                actionMask.SetActionEnabled(0, i, false);
+            }
+            //else used = i;
+        }
+        //Debug.Log("Branches used: " + (used + 1 )+" Total actions:" + (resourcesTrackingList.Count + 1));
     }
 
     #endregion
