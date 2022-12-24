@@ -40,6 +40,8 @@ public class EnemyAgent : Agent
     [Tooltip("Max size of Discrete Branch. Make sure it is equal to size of Branch 0 in Behaviour Parameters. Will be used to mask out unused actions when making a decision.")]
     [SerializeField] private int maxBranchSize;
 
+    [SerializeField] private float distancePenalisePriority = 0.5f;
+
     //private List<GameObject> resourceObjects;
 
     //public Transform target;
@@ -83,6 +85,7 @@ public class EnemyAgent : Agent
 
         gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
+        enemyPlayer.PauseMovement(); //Pause movement to not start moving to resources to scan
 
         while(gameManager.ResourceObjects == null || gameManager.ResourceObjects.Count == 0) //Wait until resources are loaded
         {
@@ -136,6 +139,7 @@ public class EnemyAgent : Agent
                 resourceCounter++;
                 Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
             }
+            enemyPlayer.ResumeMovement(); //Resume movement again
 
             RequestDecision(); //After getting list, request decision
 
@@ -170,8 +174,12 @@ public class EnemyAgent : Agent
     /// </summary>
     /// <param name="targetResource"></param>
     /// <returns></returns>
-    public IEnumerator GatherResource(Transform targetResource)
+    public IEnumerator GatherResource(Transform targetResource, float distToPlayer, float distToBase)
     {
+        //Penalize based on distances
+        AddReward(-(distToPlayer * distancePenalisePriority));
+        AddReward(-(distToBase * distancePenalisePriority));
+
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
 
@@ -222,6 +230,11 @@ public class EnemyAgent : Agent
         StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
     }
 
+    public void InventoryRemainderPenalize(float penalty)
+    {
+        AddReward(-penalty);
+    }
+
     #region Agent methods
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -266,7 +279,9 @@ public class EnemyAgent : Agent
         else //1 or greater, choose to gather a resource
         {
             Debug.Log("Going to gather resource " + (actionIndex - 1) + ": " + resourcesTrackingList[actionIndex - 1].type); 
-            StartCoroutine(GatherResource(resourcesTrackingList[actionIndex - 1].resourceObject.transform));
+            StartCoroutine(GatherResource(resourcesTrackingList[actionIndex - 1].resourceObject.transform,
+                resourcesTrackingList[actionIndex - 1].distanceFromPlayer,
+                resourcesTrackingList[actionIndex - 1].distanceFromBase));
         }
     }
 
@@ -306,7 +321,7 @@ public class EnemyAgent : Agent
     {
         Transform target = gameManager.ResourceObjects[Random.Range(0, gameManager.ResourceObjects.Count)].transform;
         Debug.Log("Test target: " + target.name+" at position: "+target.position);
-        StartCoroutine(GatherResource(target));
+        StartCoroutine(GatherResource(target,0,0));
     }
 
     [ContextMenu("Return to Base and Deposit")]
@@ -333,6 +348,8 @@ public class EnemyPlayer : ParentPlayer
 
     private NavMeshAgent navmeshAgent;
     public bool destinationReached = false;
+    private EnemyAgent enemyAgent;
+
     protected override void Start()
     {
         base.Start();
@@ -340,11 +357,23 @@ public class EnemyPlayer : ParentPlayer
 
         navmeshAgent.speed = movementSpeed;
 
+        enemyAgent = gameObject.GetComponent<EnemyAgent>(); //Access enemyAgent for point rewards
     }
 
     public override void Interact()
     {
         base.Interact();
+    }
+
+    public override void AddScore(int index)
+    {
+        base.AddScore(index);
+        enemyAgent.AddReward(inventory[index].points); //Add points of deposited items as reward
+    }
+
+    public override void InventoryRemainderPenalize(float penalty)
+    {
+        enemyAgent.InventoryRemainderPenalize(penalty);
     }
 
     public IEnumerator GoToDestination(Transform destination)

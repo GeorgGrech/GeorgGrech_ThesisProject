@@ -83,7 +83,7 @@ public class ParentPlayer : MonoBehaviour
     }
 
 
-    public void AddScore(int index)
+    public virtual void AddScore(int index)
     {
         score += inventory[index].points;
         Debug.Log(inventory[index].name + " with " + inventory[index].points + " points deposited. " + tag + " score is now: " + score);
@@ -103,5 +103,10 @@ public class ParentPlayer : MonoBehaviour
     public void ResumeMovement()
     {
         movementSpeed = defaultMovementSpeed;
+    }
+
+    public virtual void InventoryRemainderPenalize(float penalty)
+    {
+        //Leave empty. To be set in EnemyPlayer, and links to EnemyAgent.
     }
 }
