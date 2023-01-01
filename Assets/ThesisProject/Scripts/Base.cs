@@ -45,7 +45,8 @@ public class Base : MonoBehaviour
         else
         {
             playerScript = playerObject.GetComponent<EnemyPlayer>();
-            playerScript.InventoryRemainderPenalize(0);
+            
+            playerScript.InventoryRemainderPenalize();
         }
 
         playerScript.playerInteracting = playerInteracting;

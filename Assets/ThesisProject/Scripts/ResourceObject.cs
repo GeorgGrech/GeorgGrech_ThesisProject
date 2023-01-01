@@ -41,7 +41,8 @@ public class ResourceObject : MonoBehaviour
 
     private bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction or enemy and player interacting with same resource
 
-    private GameManager gameManager;
+    //private GameManager gameManager;
+    private ItemSpawner itemSpawner;
     //private GameObject playerObject; //To be inhabited by player/enemy when entering collider to access functionality/variables
 
     //A* Components
@@ -56,8 +57,8 @@ public class ResourceObject : MonoBehaviour
         //seeker = GetComponent<Seeker>();
         navmeshAgent = GetComponentInChildren<NavMeshAgent>();
 
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        gameManager.ResourceObjects.Add(gameObject);
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        itemSpawner.ResourceObjects.Add(gameObject);
     }
 
     // Update is called once per frame
@@ -108,9 +109,10 @@ public class ResourceObject : MonoBehaviour
             playerScript.PauseMovement(); //Pause player movement for duration of resource gathering
 
             yield return new WaitForSeconds(dropTime);
-           
-            playerScript.inventory.Add(resourceDropped);
-            playerScript.inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
+
+            playerScript.AddToInventory(resourceDropped);
+            //playerScript.inventory.Add(resourceDropped);
+            //playerScript.inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
 
             Debug.Log("Item deposited");
         }

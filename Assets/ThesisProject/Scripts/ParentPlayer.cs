@@ -89,6 +89,12 @@ public class ParentPlayer : MonoBehaviour
         Debug.Log(inventory[index].name + " with " + inventory[index].points + " points deposited. " + tag + " score is now: " + score);
     }
 
+    public virtual void AddToInventory(Resource resourceDropped)
+    {
+        inventory.Add(resourceDropped);
+        inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
+    }
+
     public void ResetInventory()
     {
         inventoryAmountFree = maxInventorySize;
@@ -105,7 +111,7 @@ public class ParentPlayer : MonoBehaviour
         movementSpeed = defaultMovementSpeed;
     }
 
-    public virtual void InventoryRemainderPenalize(float penalty)
+    public virtual void InventoryRemainderPenalize()
     {
         //Leave empty. To be set in EnemyPlayer, and links to EnemyAgent.
     }

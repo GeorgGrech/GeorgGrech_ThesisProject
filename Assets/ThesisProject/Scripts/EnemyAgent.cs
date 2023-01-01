@@ -25,11 +25,14 @@ public class ResourceData
 
 public class EnemyAgent : Agent
 {
+    private bool firstTimeStart = true; //Used so that OnEpisodeBegin isn't called on start
+
     private EnemyPlayer enemyPlayer;
     private Transform enemyBase;
     //private Transform targetResource;
 
-    private GameManager gameManager;
+    //private GameManager gameManager;
+    public ItemSpawner itemSpawner;
 
     public List<ResourceData> resourcesTrackingList; //Scanned list including all distances to enemy and base
     [SerializeField] private int initialScanRange; 
@@ -41,6 +44,7 @@ public class EnemyAgent : Agent
     [SerializeField] private int maxBranchSize;
 
     [SerializeField] private float distancePenalisePriority = 0.5f;
+    public float resourceGatherRewardPriority = 0.5f;
 
     //private List<GameObject> resourceObjects;
 
@@ -52,7 +56,8 @@ public class EnemyAgent : Agent
         enemyPlayer = gameObject.AddComponent<EnemyPlayer>();
         enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").transform;
 
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        //gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
         navmeshAgent = GetComponent<NavMeshAgent>();
 
@@ -63,7 +68,7 @@ public class EnemyAgent : Agent
         StartCoroutine(GetTrackingList());
         //PopulateTrackingList();
 
-        
+        firstTimeStart = false;
     }
 
     // Update is called once per frame
@@ -83,11 +88,11 @@ public class EnemyAgent : Agent
     {
         navmeshSurface.BuildNavMesh(); //Rebuild navmesh
 
-        gameManager.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
+        itemSpawner.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
 
         enemyPlayer.PauseMovement(); //Pause movement to not start moving to resources to scan
 
-        while(gameManager.ResourceObjects == null || gameManager.ResourceObjects.Count == 0) //Wait until resources are loaded
+        while(itemSpawner.ResourceObjects == null || itemSpawner.ResourceObjects.Count == 0) //Wait until resources are loaded
         {
             yield return null;
         }
@@ -230,6 +235,17 @@ public class EnemyAgent : Agent
         StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
     }
 
+
+    public override void OnEpisodeBegin()
+    {
+        if (!firstTimeStart) //Double check so that this function doesn't run on start
+        {
+            itemSpawner.ResetLevel(this.gameObject);
+            enemyPlayer.ResetInventory();
+            enemyPlayer.score = 0;
+        }
+    }
+
     public void InventoryRemainderPenalize(float penalty)
     {
         AddReward(-penalty);
@@ -319,7 +335,7 @@ public class EnemyAgent : Agent
     [ContextMenu("Gather Random Resource")]
     void GatherRandomResource()
     {
-        Transform target = gameManager.ResourceObjects[Random.Range(0, gameManager.ResourceObjects.Count)].transform;
+        Transform target = itemSpawner.ResourceObjects[Random.Range(0, itemSpawner.ResourceObjects.Count)].transform;
         Debug.Log("Test target: " + target.name+" at position: "+target.position);
         StartCoroutine(GatherResource(target,0,0));
     }
@@ -369,11 +385,24 @@ public class EnemyPlayer : ParentPlayer
     {
         base.AddScore(index);
         enemyAgent.AddReward(inventory[index].points); //Add points of deposited items as reward
+
+        if(score >= 100 && enemyAgent.itemSpawner.agentTrainingLevel)
+        {
+            enemyAgent.EndEpisode();
+        }
     }
 
-    public override void InventoryRemainderPenalize(float penalty)
+    public override void InventoryRemainderPenalize()
     {
-        enemyAgent.InventoryRemainderPenalize(penalty);
+        enemyAgent.InventoryRemainderPenalize(maxInventorySize-inventoryAmountFree);
+    }
+
+    public override void AddToInventory(Resource resourceDropped)
+    {
+        base.AddToInventory(resourceDropped);
+
+        //This line of code rewards the agent for simply gathering a resource, though the award is less
+        //enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority);
     }
 
     public IEnumerator GoToDestination(Transform destination)

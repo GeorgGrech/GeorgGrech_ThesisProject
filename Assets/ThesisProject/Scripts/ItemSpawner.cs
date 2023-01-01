@@ -6,7 +6,9 @@ using UnityEditor;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [SerializeField] private bool agentTrainingLevel = false; //if level is used for training
+    public List<GameObject> ResourceObjects; //List of all resource objects in scene, to be used when training agent
+
+    [SerializeField] public bool agentTrainingLevel = false; //if level is used for training
 
     //[SerializeField] private GameObject levelTerrainObject; //Level Terrain GameObject
     [SerializeField] private Terrain levelTerrain;
@@ -153,6 +155,25 @@ public class ItemSpawner : MonoBehaviour
         Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
     }
 
+    public void ResetLevel(GameObject enemy) //Used by Enemy Agent for resetting level for new episode
+    {
+        //itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+
+        foreach(GameObject resourceObject in ResourceObjects)
+        {
+            Destroy(resourceObject);
+        }
+        ClearNullValues();
+ 
+        SpawnResources(); //Spawn Resources
+        RelocateEnemy(enemy);
+    }
+
+    public void RelocateEnemy(GameObject enemy) //Relocate enemy
+    {
+        enemy.transform.position = new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z);
+    }
+
     private Vector3 GenerateRandomBaseSpawn()
     {
         Vector3 spawnLocation = new Vector3(Random.Range((terrainSizeX/2)-baseCenterOffset,(terrainSizeX/2)+baseCenterOffset),
@@ -173,4 +194,9 @@ public class ItemSpawner : MonoBehaviour
     }
     */
 
+
+    public void ClearNullValues()
+    {
+        ResourceObjects.RemoveAll(s => s == null);
+    }
 }
