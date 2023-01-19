@@ -44,6 +44,7 @@ public class EnemyAgent : Agent
     [SerializeField] private int maxBranchSize;
 
     [SerializeField] private float distancePenalisePriority = 0.5f;
+    public int EndEpisodeScore = 2000;
     public float resourceGatherRewardPriority = 0.5f;
 
     //private List<GameObject> resourceObjects;
@@ -109,7 +110,7 @@ public class EnemyAgent : Agent
         if(hits.Length > 0) //Safety precaution, if nothing found after scanning, don't do anything
         {
             int resourceCounter = 0; //Used to for debugging by tracking progress
-            int resourceAmount = hits.Length;
+            //int resourceAmount = hits.Length;
 
             resourcesTrackingList = new List<ResourceData>();
 
@@ -142,19 +143,20 @@ public class EnemyAgent : Agent
 
                 });
                 resourceCounter++;
-                Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
+                //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
             }
             enemyPlayer.ResumeMovement(); //Resume movement again
 
             RequestDecision(); //After getting list, request decision
 
+            /*
             //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
             foreach (ResourceData resourceData in resourcesTrackingList)
             {
                 Debug.Log("ResourceData added- Type: " + resourceData.type +
                     " DistFromPlayer: " + resourceData.distanceFromPlayer +
                     " DistFromBase: " + resourceData.distanceFromBase);
-            }
+            }*/
         }   
     }
 
@@ -276,6 +278,7 @@ public class EnemyAgent : Agent
             }
             //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
         }
+        sensor.AddObservation(enemyPlayer.inventoryAmountFree); //Keep track of inventory
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -386,7 +389,7 @@ public class EnemyPlayer : ParentPlayer
         base.AddScore(index);
         enemyAgent.AddReward(inventory[index].points); //Add points of deposited items as reward
 
-        if(score >= 100 && enemyAgent.itemSpawner.agentTrainingLevel)
+        if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)
         {
             enemyAgent.EndEpisode();
         }

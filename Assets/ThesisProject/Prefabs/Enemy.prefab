@@ -309,7 +309,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 2
+  m_StoppingDistance: 3
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -333,6 +333,10 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  initialScanRange: 15
+  itemSpawner: {fileID: 0}
+  initialScanRange: 10
   navmeshSurface: {fileID: 0}
   maxBranchSize: 50
+  distancePenalisePriority: 0.5
+  EndEpisodeScore: 2000
+  resourceGatherRewardPriority: 0.5

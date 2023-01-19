@@ -146,19 +146,26 @@ public class ResourceObject : MonoBehaviour
     //copy of GetPathRemainingDistance in EnemyAgent
     public float GetPathRemainingDistance()
     {
-        //EnableNavAgent(true);
-        if (navmeshAgent.pathPending ||
-            navmeshAgent.pathStatus == NavMeshPathStatus.PathInvalid ||
-            navmeshAgent.path.corners.Length == 0)
-            return -1f;
-
-        float distance = 0.0f;
-        for (int i = 0; i < navmeshAgent.path.corners.Length - 1; ++i)
+        try
         {
-            distance += Vector3.Distance(navmeshAgent.path.corners[i], navmeshAgent.path.corners[i + 1]);
+            //EnableNavAgent(true);
+            if (navmeshAgent.pathPending ||
+                navmeshAgent.pathStatus == NavMeshPathStatus.PathInvalid ||
+                navmeshAgent.path.corners.Length == 0)
+                return -1f;
+
+            float distance = 0.0f;
+            for (int i = 0; i < navmeshAgent.path.corners.Length - 1; ++i)
+            {
+                distance += Vector3.Distance(navmeshAgent.path.corners[i], navmeshAgent.path.corners[i + 1]);
+            }
+            //EnableNavAgent(false);
+            return distance;
         }
-        //EnableNavAgent(false);
-        return distance;
+        catch //Error thrown due to destroyed navmesh on level reset
+        {
+            return -1;
+        }
     }
 
     private void EnableNavAgent(bool enable)

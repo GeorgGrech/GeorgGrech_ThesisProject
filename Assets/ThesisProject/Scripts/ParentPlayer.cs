@@ -54,7 +54,7 @@ public class ParentPlayer : MonoBehaviour
     protected virtual void OnTriggerEnter(Collider other)
     {
 
-        Debug.Log("OnTriggerEnter");
+        //Debug.Log("OnTriggerEnter");
         interactableObject = other.gameObject;
      }
 
