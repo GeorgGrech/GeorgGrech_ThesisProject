@@ -55,7 +55,8 @@ public class ResourceObject : MonoBehaviour
     {
         //aiPath = GetComponent<AIPath>();
         //seeker = GetComponent<Seeker>();
-        navmeshAgent = GetComponentInChildren<NavMeshAgent>();
+        //navmeshAgent = GetComponentInChildren<NavMeshAgent>();
+        //navmeshAgent = Get<NavMeshAgent>();
 
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
         itemSpawner.ResourceObjects.Add(gameObject);
@@ -81,6 +82,7 @@ public class ResourceObject : MonoBehaviour
     //Dropping the player resources in thier inventory
     public IEnumerator GiveResources(GameObject playerObject)
     {
+        Debug.Log("Error track - Start of GiveResources");
         playerInteracting = true;
 
         ParentPlayer playerScript = null;
@@ -132,6 +134,7 @@ public class ResourceObject : MonoBehaviour
 
         playerInteracting = false;
         playerScript.playerInteracting = playerInteracting;
+        Debug.Log("Error track - End of GiveResources");
     }
 
     void InteractAction(GameObject playerObject)

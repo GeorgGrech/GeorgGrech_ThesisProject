@@ -87,6 +87,7 @@ public class EnemyAgent : Agent
 
     public IEnumerator GetTrackingList()
     {
+        Debug.Log("Error track - Start of GetTrackingList");
         navmeshSurface.BuildNavMesh(); //Rebuild navmesh
 
         itemSpawner.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
@@ -98,6 +99,8 @@ public class EnemyAgent : Agent
             yield return null;
         }
 
+        Debug.Log("GetTrackingList Trace: 1");
+
         Collider[] hits = new Collider[0];
         int scanRange = initialScanRange;
 
@@ -106,14 +109,16 @@ public class EnemyAgent : Agent
             hits = Physics.OverlapSphere(transform.position, scanRange, 1<<6); //Get resources within range, and only in "Resource" layer
             scanRange += 10; //if no objects detected in range, increase range
         }
+        Debug.Log("GetTrackingList Trace: 2");
 
-        if(hits.Length > 0) //Safety precaution, if nothing found after scanning, don't do anything
+        if (hits.Length > 0) //Safety precaution, if nothing found after scanning, don't do anything
         {
             int resourceCounter = 0; //Used to for debugging by tracking progress
             //int resourceAmount = hits.Length;
 
             resourcesTrackingList = new List<ResourceData>();
 
+            Debug.Log("GetTrackingList Trace: 3");
             foreach (Collider collider in hits)
             {
                 //1. Save distance from player to resource
@@ -123,29 +128,36 @@ public class EnemyAgent : Agent
                     yield return null;
                 }
                 float distanceFromPlayer = GetPathRemainingDistance();
+                Debug.Log("GetTrackingList Trace: 4");
 
                 //2. Save distance from resource to base
-                ResourceObject objectScript = collider.gameObject.GetComponent<ResourceObject>();
+                GameObject resourceObject = collider.transform.parent.gameObject;
+                ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
                 objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
+                Debug.Log("GetTrackingList Trace - Resource name:"+collider.name +" Resource position:"+collider.transform.position);
                 while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                 {
                     yield return null;
                 }
                 float distanceFromBase = objectScript.GetPathRemainingDistance();
+                Debug.Log("GetTrackingList Trace: 5");
 
                 resourcesTrackingList.Add(new ResourceData()
                 {
-                    resourceObject = collider.gameObject,
+                    resourceObject = resourceObject,
                     //Save type
-                    type = collider.GetComponent<ResourceObject>().resourceDropped.resourceType,
+                    type = resourceObject.GetComponent<ResourceObject>().resourceDropped.resourceType,
                     distanceFromPlayer = distanceFromPlayer,
                     distanceFromBase = distanceFromBase
 
                 });
                 resourceCounter++;
                 //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
+                Debug.Log("GetTrackingList Trace: 6");
             }
             enemyPlayer.ResumeMovement(); //Resume movement again
+            Debug.Log("Error track - End of GetTrackingList");
+
 
             RequestDecision(); //After getting list, request decision
 
@@ -183,6 +195,7 @@ public class EnemyAgent : Agent
     /// <returns></returns>
     public IEnumerator GatherResource(Transform targetResource, float distToPlayer, float distToBase)
     {
+        Debug.Log("Error track - Start of GatherResource");
         //Penalize based on distances
         AddReward(-(distToPlayer * distancePenalisePriority));
         AddReward(-(distToBase * distancePenalisePriority));
@@ -205,6 +218,7 @@ public class EnemyAgent : Agent
             yield return null;
         }
         Debug.Log("Action completed. Interaction successful or interrupted.");
+        Debug.Log("Error track - End of GatherResource");
 
         StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
     }
@@ -381,6 +395,7 @@ public class EnemyPlayer : ParentPlayer
 
     public override void Interact()
     {
+        Debug.Log("Error track - Interact");
         base.Interact();
     }
 
@@ -442,7 +457,7 @@ public class EnemyPlayer : ParentPlayer
             }
             else yield return null;
         }
-
+        Debug.Log("Error track - End of GoToDestination");
         Interact();
     }
 
