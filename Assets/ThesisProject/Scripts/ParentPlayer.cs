@@ -115,4 +115,9 @@ public class ParentPlayer : MonoBehaviour
     {
         //Leave empty. To be set in EnemyPlayer, and links to EnemyAgent.
     }
+
+    public virtual void FullInventoryPenalize()
+    {
+        //Leave empty. To be set in EnemyPlayer, and links to EnemyAgent.
+    }
 }

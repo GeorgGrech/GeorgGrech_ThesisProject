@@ -290,10 +290,11 @@ public class EnemyAgent : Agent
         }
     }
 
-    public void InventoryRemainderPenalize(float penalty)
+    public void Penalty(float penalty)
     {
         AddReward(-penalty);
     }
+
 
     #region Agent methods
     public override void CollectObservations(VectorSensor sensor)
@@ -440,7 +441,13 @@ public class EnemyPlayer : ParentPlayer
 
     public override void InventoryRemainderPenalize()
     {
-        enemyAgent.InventoryRemainderPenalize(maxInventorySize-inventoryAmountFree);
+        enemyAgent.Penalty(maxInventorySize-inventoryAmountFree);
+    }
+
+    //Technically the same as InventoryRemainderPenalize
+    public override void FullInventoryPenalize()
+    {
+        enemyAgent.Penalty(maxInventorySize-inventoryAmountFree);
     }
 
     public override void AddToInventory(Resource resourceDropped)
