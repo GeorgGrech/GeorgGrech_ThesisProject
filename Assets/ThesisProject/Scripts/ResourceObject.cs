@@ -50,6 +50,9 @@ public class ResourceObject : MonoBehaviour
     //private Seeker seeker;
     public NavMeshAgent navmeshAgent;
 
+    //private Transform enemyBase;
+    private int validCounter;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -60,6 +63,10 @@ public class ResourceObject : MonoBehaviour
 
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
         itemSpawner.ResourceObjects.Add(gameObject);
+
+        //enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").GetComponent<Transform>();
+
+        //StartCoroutine(ValidNavCheck());
     }
 
     // Update is called once per frame
@@ -169,6 +176,38 @@ public class ResourceObject : MonoBehaviour
         {
             return -1;
         }
+    }
+
+    /*
+    private IEnumerator ValidNavCheck()
+    {
+        yield return new WaitForSecondsRealtime(.5f);
+        StartCoroutine(ValidCounter());
+        navmeshAgent.destination = enemyBase.position;
+        while (GetPathRemainingDistance() == -1) //If generates an invalid path, destroy to not mess up EnemyAgent
+        {
+            yield return null;
+            if(validCounter == 6)
+            {
+                Debug.Log("Resource in invalid spawn Destroyed");
+                Destroy(gameObject);
+            }
+        }
+    }
+
+    private IEnumerator ValidCounter()
+    {
+        while(validCounter < 6)
+        {
+            yield return new WaitForSecondsRealtime(1);
+            validCounter++;
+        }
+    }
+    */
+
+    private void OnDestroy()
+    {
+        itemSpawner.ClearNullValues();
     }
 
     private void EnableNavAgent(bool enable)

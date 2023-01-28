@@ -51,6 +51,9 @@ public class EnemyAgent : Agent
 
     //public Transform target;
     // Start is called before the first frame update
+
+    private int validCounter;
+
     void Start()
     {
         //playerScript = gameObject.GetComponent<ParentPlayer>();
@@ -87,7 +90,6 @@ public class EnemyAgent : Agent
 
     public IEnumerator GetTrackingList()
     {
-        Debug.Log("Error track - Start of GetTrackingList");
         navmeshSurface.BuildNavMesh(); //Rebuild navmesh
 
         itemSpawner.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
@@ -99,7 +101,6 @@ public class EnemyAgent : Agent
             yield return null;
         }
 
-        Debug.Log("GetTrackingList Trace: 1");
 
         Collider[] hits = new Collider[0];
         int scanRange = initialScanRange;
@@ -109,7 +110,6 @@ public class EnemyAgent : Agent
             hits = Physics.OverlapSphere(transform.position, scanRange, 1<<6); //Get resources within range, and only in "Resource" layer
             scanRange += 10; //if no objects detected in range, increase range
         }
-        Debug.Log("GetTrackingList Trace: 2");
 
         if (hits.Length > 0) //Safety precaution, if nothing found after scanning, don't do anything
         {
@@ -121,13 +121,15 @@ public class EnemyAgent : Agent
             Debug.Log("GetTrackingList Trace: 3");
             foreach (Collider collider in hits)
             {
+                bool validNav = true;
                 //1. Save distance from player to resource
                 navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
                 while (GetPathRemainingDistance() == -1) //Keep trying until value is valid
                 {
                     yield return null;
                 }
-                float distanceFromPlayer = GetPathRemainingDistance();
+                float distanceFromPlayer; 
+
                 Debug.Log("GetTrackingList Trace: 4");
 
                 //2. Save distance from resource to base
@@ -135,11 +137,28 @@ public class EnemyAgent : Agent
                 ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
                 objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
                 Debug.Log("GetTrackingList Trace - Resource name:"+collider.name +" Resource position:"+collider.transform.position);
+                Coroutine validTimer = StartCoroutine(StartValidTimer());
                 while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                 {
                     yield return null;
+                    if (validCounter == 2) //If still invalid after some time, break
+                    {
+                        validNav = false;
+                        break;
+                    }
                 }
-                float distanceFromBase = objectScript.GetPathRemainingDistance();
+                StopCoroutine(validTimer);
+                float distanceFromBase = 0;
+                if (validNav)
+                {
+                    distanceFromPlayer = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
+                    Debug.Log("Valid nav, using nav distance");
+                }
+                else
+                {
+                    distanceFromPlayer = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
+                    Debug.Log("Invalid nav, using Vector3.distance");
+                }
                 Debug.Log("GetTrackingList Trace: 5");
 
                 resourcesTrackingList.Add(new ResourceData()
@@ -156,7 +175,6 @@ public class EnemyAgent : Agent
                 Debug.Log("GetTrackingList Trace: 6");
             }
             enemyPlayer.ResumeMovement(); //Resume movement again
-            Debug.Log("Error track - End of GetTrackingList");
 
 
             RequestDecision(); //After getting list, request decision
@@ -170,6 +188,16 @@ public class EnemyAgent : Agent
                     " DistFromBase: " + resourceData.distanceFromBase);
             }*/
         }   
+    }
+
+    private IEnumerator StartValidTimer()
+    {
+        validCounter = 0;
+        while (validCounter < 2)
+        {
+            yield return new WaitForSecondsRealtime(1);
+            validCounter++;
+        }
     }
 
     public float GetPathRemainingDistance()
