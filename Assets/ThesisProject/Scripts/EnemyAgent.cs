@@ -7,6 +7,7 @@ using Unity.MLAgents.Actuators;
 //using Pathfinding;
 using UnityEngine.AI;
 using UnityEditor;
+using Unity.Barracuda;
 
 /// <summary>
 /// EnemyAgent class, inheritng base ML Agent class, to handle all decisions and direct actions, including ones from ParentPlayer class
@@ -47,6 +48,9 @@ public class EnemyAgent : Agent
     [SerializeField] private float distancePenalisePriority = 0.5f;
     public int EndEpisodeScore = 2000;
     public float resourceGatherRewardPriority = 0.5f;
+
+    //Brains
+    [SerializeField] private NNModel[] brains;
 
     //private List<GameObject> resourceObjects;
 
@@ -149,7 +153,7 @@ public class EnemyAgent : Agent
                 while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                 {
                     yield return null;
-                    if (validCounter == 2) //If still invalid after some time, break
+                    if (validCounter == 1) //If still invalid after some time, break
                     {
                         validNav = false;
                         break;
@@ -408,6 +412,14 @@ public class EnemyAgent : Agent
     void ReturnToBaseMethod()
     {
         StartCoroutine(ReturnToBase());
+    }
+
+    [ContextMenu("Switch to a random brain")]
+    void SwitchRandomBrain()
+    {
+        NNModel brain = brains[Random.Range(0, brains.Length)];
+        SetModel("ResourceAgent",brain);
+        Debug.Log("Switched brain to: " + brain.name);
     }
 }
 #endregion
