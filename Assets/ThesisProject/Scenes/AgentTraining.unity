@@ -267,7 +267,16 @@ MonoBehaviour:
     type: 3}
   resourceSpacing: 7
   resourceSpawnShift: 3
-  baseDistance: 15
+  baseDistance: 13
+  spawnObstacles: 1
+  obstacles:
+  - {fileID: 4024317698084744343, guid: dcaba7c046341f047afb8affcc8024e1, type: 3}
+  - {fileID: 9220673664177831179, guid: 7a35e6455f71a3a40b4e0571308a3534, type: 3}
+  - {fileID: 1908033939812833041, guid: eaa57fd73d23cb94dba94ba5b9b4fe4e, type: 3}
+  obstacleSpacing: 18
+  obstacleSpawnShift: 8
+  obstacleMinResize: 0.7
+  obstacleMaxResize: 1.5
   baseCenterOffset: 20
   playerSpawnDistance: 7
 --- !u!4 &896609941

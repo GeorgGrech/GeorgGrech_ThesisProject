@@ -33,6 +33,7 @@ TagManager:
   - PlayerBase
   - EnemyBase
   - Enemy
+  - Obstacle
   layers:
   - Default
   - TransparentFX

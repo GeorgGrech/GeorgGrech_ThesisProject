@@ -6,6 +6,7 @@ using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 //using Pathfinding;
 using UnityEngine.AI;
+using UnityEditor;
 
 /// <summary>
 /// EnemyAgent class, inheritng base ML Agent class, to handle all decisions and direct actions, including ones from ParentPlayer class
@@ -69,7 +70,8 @@ public class EnemyAgent : Agent
 
         resourcesTrackingList = new List<ResourceData>();
 
-        StartCoroutine(GetTrackingList());
+        StartCoroutine(DelayedStart()); //Delayed GetTrackingList
+        //StartCoroutine(GetTrackingList());
         //PopulateTrackingList();
 
         firstTimeStart = false;
@@ -85,6 +87,12 @@ public class EnemyAgent : Agent
     [ContextMenu("Update Distances")]
     public void TrackingListActivate()
     {
+        StartCoroutine(GetTrackingList());
+    }
+
+    private IEnumerator DelayedStart()
+    {
+        yield return new WaitForSecondsRealtime(.5f); //Slightly delayed GetTrackingList to let all vital start methods complete
         StartCoroutine(GetTrackingList());
     }
 
@@ -193,7 +201,7 @@ public class EnemyAgent : Agent
     private IEnumerator StartValidTimer()
     {
         validCounter = 0;
-        while (validCounter < 2)
+        while (validCounter < 1)
         {
             yield return new WaitForSecondsRealtime(1);
             validCounter++;
@@ -287,6 +295,14 @@ public class EnemyAgent : Agent
             itemSpawner.ResetLevel(this.gameObject);
             enemyPlayer.ResetInventory();
             enemyPlayer.score = 0;
+            
+            StopAllCoroutines(); //Stop any actions
+            StartCoroutine(DelayedStart()); //Start actions again with delay
+        }
+
+        if(CompletedEpisodes >= 2) //For every 2 completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
+        {
+            EditorApplication.ExitPlaymode();
         }
     }
 
@@ -360,6 +376,8 @@ public class EnemyAgent : Agent
         }
         //Debug.Log("Branches used: " + (used + 1 )+" Total actions:" + (resourcesTrackingList.Count + 1));
     }
+
+    
 
     #endregion
 
@@ -455,7 +473,7 @@ public class EnemyPlayer : ParentPlayer
         base.AddToInventory(resourceDropped);
 
         //This line of code rewards the agent for simply gathering a resource, though the award is less
-        //enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority);
+        enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority);
     }
 
     public IEnumerator GoToDestination(Transform destination)

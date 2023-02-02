@@ -29,6 +29,14 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private float resourceSpawnShift; //Amount of random shift from original resource spawn
     [SerializeField] private float baseDistance; //Minimum empty distance around bases
 
+    private GameObject ObstacleParent; //World object to contain all resource gameobjects for tidiness
+    [SerializeField] private bool spawnObstacles; //Obstacles that spawn in world
+    [SerializeField] private GameObject[] obstacles; //Obstacles that spawn in world
+    [SerializeField] private int obstacleSpacing; //Spacing between obstacles
+    [SerializeField] private float obstacleSpawnShift; //Amount of random shift from original obstacle spawn
+    [SerializeField] private float obstacleMinResize; //Min amount possible of x/z scaling
+    [SerializeField] private float obstacleMaxResize; //Max amount possible of x/z scaling
+
     [SerializeField] private float baseCenterOffset; //Max random offset from center of map for base spawn
     [SerializeField] private float playerSpawnDistance; //Spawn distance for both player and enemy for their respective bases
 
@@ -49,6 +57,7 @@ public class ItemSpawner : MonoBehaviour
 
         SpawnEnemyBase(); //Spawn Enemy Base taking note of Player Base location
         SpawnResources(); //Spawn Resources
+        SpawnObstacles();
         SpawnEnemy(); //Spawn Enemy near Enemy Base
 
     }
@@ -108,7 +117,7 @@ public class ItemSpawner : MonoBehaviour
                 if((Vector3.Distance(resourcePosition,playerBaseLocation)>baseDistance)&& //Distant from Player Base
                     (Vector3.Distance(resourcePosition, enemyBaseLocation) > baseDistance)) //Distant from Enemy Base
                 {
-                    int randomNum = Random.Range(0, 10); //Random number to decide what resource
+                    int randomNum = Random.Range(0, 6); //Random number to decide what resource
                     if (randomNum == 0)
                     {
                         Instantiate(resource2, resourcePosition, Quaternion.identity,ResourceParent.transform); // 1 in 10 chance of instantating rarer resource
@@ -159,13 +168,17 @@ public class ItemSpawner : MonoBehaviour
     {
         //itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
+        Destroy(ResourceParent);
+        Destroy(ObstacleParent);
+        /*
         foreach(GameObject resourceObject in ResourceObjects)
         {
             Destroy(resourceObject);
-        }
+        }*/
         ClearNullValues();
  
         SpawnResources(); //Spawn Resources
+        SpawnObstacles();
         RelocateEnemy(enemy);
     }
 
@@ -198,5 +211,41 @@ public class ItemSpawner : MonoBehaviour
     public void ClearNullValues()
     {
         ResourceObjects.RemoveAll(s => s == null);
+    }
+
+
+    private void SpawnObstacles()
+    {
+        if (spawnObstacles)
+        {
+            ObstacleParent = new GameObject
+            {
+                name = "Obstacles"
+            };
+
+            for (int z = 0; z < terrainSizeZ; z += obstacleSpacing)
+            {
+                for (int x = 0; x < terrainSizeX; x += obstacleSpacing)
+                {
+
+                    float randomX = (x + Random.Range(-obstacleSpawnShift, obstacleSpawnShift)) / terrainSizeX;
+                    float randomZ = (z + Random.Range(-obstacleSpawnShift, obstacleSpawnShift)) / terrainSizeZ; //Shift position slightly to be more natural
+
+                    Vector3 obstaclePosition = new Vector3(randomX * terrainSizeX,
+                                                        /*currentHeight * terrainData.size.y,*/ 0,
+                                                        randomZ * terrainSizeX) + this.transform.position;
+
+                    if ((Vector3.Distance(obstaclePosition, playerBaseLocation) > baseDistance) && //Distant from Player Base
+                        (Vector3.Distance(obstaclePosition, enemyBaseLocation) > baseDistance)) //Distant from Enemy Base
+                    {
+                        Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 360), 0); //Random y rotation
+
+                        GameObject ObstacleInstance = Instantiate(obstacles[Random.Range(0,obstacles.Length)], obstaclePosition, spawnRotation, ObstacleParent.transform); //Spawn obstacle from list
+
+                        ObstacleInstance.transform.localScale = new Vector3(Random.Range(obstacleMinResize, obstacleMaxResize), 1, Random.Range(obstacleMinResize, obstacleMaxResize)); //Resize object x and z at random
+                    }
+                }
+            }
+        }
     }
 }

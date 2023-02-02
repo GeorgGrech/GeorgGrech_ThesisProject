@@ -51,7 +51,7 @@ public class ResourceObject : MonoBehaviour
     public NavMeshAgent navmeshAgent;
 
     //private Transform enemyBase;
-    private int validCounter;
+    //private int validCounter;
 
     // Start is called before the first frame update
     void Start()
@@ -83,6 +83,13 @@ public class ResourceObject : MonoBehaviour
             //playerObject = other.gameObject;
             //Obtain player script
 
+        }
+
+        if (other.CompareTag("Obstacle"))
+        {
+            itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>(); //Set here due to obstacle destruction occuring before itemSpawner is found
+            Debug.Log("Collision with Obstacle. Destroying...");
+            Destroy(gameObject);
         }
     }
 
