@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dropAmount: 4
-  dropTime: 3
+  dropTime: 1.5
   resourceDropped:
     name: Wood
     resourceType: 0

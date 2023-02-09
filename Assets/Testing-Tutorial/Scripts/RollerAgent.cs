@@ -63,6 +63,7 @@ public class RollerAgent : Agent
         // Fell off platform
         else if (this.transform.localPosition.y < 0)
         {
+            AddReward(-1);
             EndEpisode();
         }
     }

@@ -254,7 +254,6 @@ public class EnemyAgent : Agent
         {
             if((Vector3.Distance(transform.position,targetResource.position) < 2)&& validTimer == null) //If in vicinity, start coroutine
             {
-                Debug.Log("Starting coroutine");
                 validTimer = StartCoroutine(StartValidTimer(2));
             }
             yield return null;
@@ -340,6 +339,7 @@ public class EnemyAgent : Agent
     public void Penalty(float penalty)
     {
         AddReward(-penalty*defaultRewardWeight);
+        Debug.Log("Penalty weight: " + -penalty * defaultRewardWeight);
     }
 
 
@@ -488,7 +488,7 @@ public class EnemyPlayer : ParentPlayer
     {
         base.AddScore(index);
         enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
-
+        Debug.Log("Base deposit reward: " + inventory[index].points * enemyAgent.defaultRewardWeight);
 
         if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)
         {

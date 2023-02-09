@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 200deb9b092f9b94eb4517c26614c4a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depositTime: 3
+  depositTime: 1.5
 --- !u!208 &6300306696435902270
 NavMeshObstacle:
   m_ObjectHideFlags: 0

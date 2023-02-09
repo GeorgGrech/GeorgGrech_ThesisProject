@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dropAmount: 3
-  dropTime: 6
+  dropTime: 3
   resourceDropped:
     name: Iron
     resourceType: 1
