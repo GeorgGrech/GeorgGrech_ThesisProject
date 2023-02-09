@@ -340,6 +340,7 @@ MonoBehaviour:
   distancePenalisePriority: 0.5
   EndEpisodeScore: 3000
   resourceGatherRewardPriority: 0.25
+  defaultRewardWeight: 0.05
   brains:
   - {fileID: 5022602860645237092, guid: 012167c1fd50cc049a838109d19f34fc, type: 3}
   - {fileID: 5022602860645237092, guid: d315d9f2c55204d4ca6115d45003a996, type: 3}

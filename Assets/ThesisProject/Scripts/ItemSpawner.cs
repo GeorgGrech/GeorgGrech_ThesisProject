@@ -60,6 +60,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnObstacles();
         SpawnEnemy(); //Spawn Enemy near Enemy Base
 
+        
     }
 
     // Update is called once per frame
@@ -161,7 +162,11 @@ public class ItemSpawner : MonoBehaviour
 
     void SpawnEnemy() //Spawn Enemy agent
     {
-        Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
+        GameObject enemy = Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
+        if (!agentTrainingLevel)
+        {
+            GameObject.Find("GameManager").GetComponent<GameManager>().enemyAgent = enemy.GetComponent<EnemyAgent>();
+        }
     }
 
     public void ResetLevel(GameObject enemy) //Used by Enemy Agent for resetting level for new episode

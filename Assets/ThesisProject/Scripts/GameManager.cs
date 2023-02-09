@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-
-    public List<GameObject> ResourceObjects; //List of all resource objects in scene, to be used when training agent
+    public EnemyAgent enemyAgent; //EnemyAgent script, assignned by ItemSpawner
 
     // Start is called before the first frame update
     void Start()
@@ -17,10 +16,5 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
-    }
-
-    public void ClearNullValues()
-    {
-        ResourceObjects.RemoveAll(s => s == null);
     }
 }

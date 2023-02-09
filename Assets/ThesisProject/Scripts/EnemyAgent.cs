@@ -49,6 +49,8 @@ public class EnemyAgent : Agent
     public int EndEpisodeScore = 2000;
     public float resourceGatherRewardPriority = 0.5f;
 
+    public float defaultRewardWeight = .1f; //All rewards to be multiplied by this value to remain mostly in optimal [-1,1] range
+
     //Brains
     [SerializeField] private NNModel[] brains;
 
@@ -84,7 +86,7 @@ public class EnemyAgent : Agent
     // Update is called once per frame
     void Update()
     {
-
+        //Debug.Log("Cumulative Reward: "+GetCumulativeReward());
     }
 
 
@@ -237,8 +239,8 @@ public class EnemyAgent : Agent
     {
         Debug.Log("Error track - Start of GatherResource");
         //Penalize based on distances
-        AddReward(-(distToPlayer * distancePenalisePriority));
-        AddReward(-(distToBase * distancePenalisePriority));
+        AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
+        AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
 
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
@@ -312,7 +314,7 @@ public class EnemyAgent : Agent
 
     public void Penalty(float penalty)
     {
-        AddReward(-penalty);
+        AddReward(-penalty*defaultRewardWeight);
     }
 
 
@@ -346,7 +348,8 @@ public class EnemyAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        
+        Debug.Log("Cumulative Reward: "+GetCumulativeReward());
+
         int actionIndex = actionBuffers.DiscreteActions[0];
 
         Debug.Log("Action Index: " + actionIndex);
@@ -380,8 +383,6 @@ public class EnemyAgent : Agent
         }
         //Debug.Log("Branches used: " + (used + 1 )+" Total actions:" + (resourcesTrackingList.Count + 1));
     }
-
-    
 
     #endregion
 
@@ -461,7 +462,8 @@ public class EnemyPlayer : ParentPlayer
     public override void AddScore(int index)
     {
         base.AddScore(index);
-        enemyAgent.AddReward(inventory[index].points); //Add points of deposited items as reward
+        enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
+
 
         if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)
         {
@@ -485,7 +487,7 @@ public class EnemyPlayer : ParentPlayer
         base.AddToInventory(resourceDropped);
 
         //This line of code rewards the agent for simply gathering a resource, though the award is less
-        enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority);
+        enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority * enemyAgent.defaultRewardWeight);
     }
 
     public IEnumerator GoToDestination(Transform destination)
