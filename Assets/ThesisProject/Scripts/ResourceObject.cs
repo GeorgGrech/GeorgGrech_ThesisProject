@@ -96,7 +96,7 @@ public class ResourceObject : MonoBehaviour
     //Dropping the player resources in thier inventory
     public IEnumerator GiveResources(GameObject playerObject)
     {
-        Debug.Log("Error track - Start of GiveResources");
+        Debug.Log("GiveResources Error Track 1");
         playerInteracting = true;
 
         ParentPlayer playerScript = null;
@@ -114,6 +114,7 @@ public class ResourceObject : MonoBehaviour
             playerScript = playerObject.GetComponent<EnemyPlayer>();
             isEnemy = true;
         }
+        Debug.Log("GiveResources Error Track 2");
 
         playerScript.playerInteracting = playerInteracting;
 
@@ -121,8 +122,10 @@ public class ResourceObject : MonoBehaviour
         //Add line for enemyPlayerScript
         for (deposited = 0; deposited < dropAmount; deposited++)
         {
+            Debug.Log("GiveResources Error Track 3");
             if (playerScript.IsInventoryFull(resourceDropped.inventorySpaceTaken))
             {
+                Debug.Log("GiveResources Error Track 4");
                 if (isEnemy && deposited == 0) //Penalize if inventory already full on first interaction
                 {
                     playerScript.FullInventoryPenalize();

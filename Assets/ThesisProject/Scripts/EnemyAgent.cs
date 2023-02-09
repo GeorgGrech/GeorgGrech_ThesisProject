@@ -151,7 +151,7 @@ public class EnemyAgent : Agent
                 ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
                 objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
                 Debug.Log("GetTrackingList Trace - Resource name:"+collider.name +" Resource position:"+collider.transform.position);
-                Coroutine validTimer = StartCoroutine(StartValidTimer());
+                Coroutine validTimer = StartCoroutine(StartValidTimer(1));
                 while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                 {
                     yield return null;
@@ -204,10 +204,10 @@ public class EnemyAgent : Agent
         }   
     }
 
-    private IEnumerator StartValidTimer()
+    private IEnumerator StartValidTimer(float time)
     {
         validCounter = 0;
-        while (validCounter < 1)
+        while (validCounter < time)
         {
             yield return new WaitForSecondsRealtime(1);
             validCounter++;
@@ -237,32 +237,57 @@ public class EnemyAgent : Agent
     /// <returns></returns>
     public IEnumerator GatherResource(Transform targetResource, float distToPlayer, float distToBase)
     {
-        Debug.Log("Error track - Start of GatherResource");
+        Debug.Log("GatherResources Error Track 1");
         //Penalize based on distances
         AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
         AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
-
+        Debug.Log("GatherResources Error Track 2");
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
 
+        Debug.Log("GatherResources Error Track 3");
         // 2. Detect Destination Reached
+        bool validPos = true;
+        Coroutine validTimer = null;
+
         while (!enemyPlayer.destinationReached)
         {
+            if((Vector3.Distance(transform.position,targetResource.position) < 2)&& validTimer == null) //If in vicinity, start coroutine
+            {
+                Debug.Log("Starting coroutine");
+                validTimer = StartCoroutine(StartValidTimer(2));
+            }
             yield return null;
+            if (validCounter == 2) //If still invalid after some time, break. 
+            {
+                validPos = false;
+                break;
+            }
         }
+        if(validTimer!=null) StopCoroutine(validTimer);
 
-        // 3. Interact with item
-        //Included in GoToDestination
-
-        // 4. Wait until completion or interruption
-        while (enemyPlayer.playerInteracting)
+        if (!validPos)
         {
-            yield return null;
+            Debug.Log("Destination not reached successfully. Interrupting action and requesting decision...");
+            RequestDecision();
         }
-        Debug.Log("Action completed. Interaction successful or interrupted.");
-        Debug.Log("Error track - End of GatherResource");
 
-        StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
+        else //If destination reached successfully
+        {
+            // 3. Interact with item
+            //Included in GoToDestination
+
+            // 4. Wait until completion or interruption
+            Debug.Log("GatherResources Error Track 4");
+            while (enemyPlayer.playerInteracting)
+            {
+                yield return null;
+            }
+            Debug.Log("Action completed. Interaction successful or interrupted.");
+            Debug.Log("GatherResources Error Track 5");
+
+            StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
+        }
     }
 
 
