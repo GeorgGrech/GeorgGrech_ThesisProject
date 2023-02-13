@@ -47,6 +47,7 @@ public class EnemyAgent : Agent
 
     [SerializeField] private float distancePenalisePriority = 0.5f;
     public int EndEpisodeScore = 2000;
+    public int MaxEpisodes = 0;
     public float resourceGatherRewardPriority = 0.5f;
 
     public float defaultRewardWeight = .1f; //All rewards to be multiplied by this value to remain mostly in optimal [-1,1] range
@@ -330,7 +331,7 @@ public class EnemyAgent : Agent
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
 
-        if(CompletedEpisodes >= 2) //For every 2 completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
+        if(MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every 2 completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
         {
             EditorApplication.ExitPlaymode();
         }

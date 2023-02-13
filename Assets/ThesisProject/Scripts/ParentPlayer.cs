@@ -95,7 +95,7 @@ public class ParentPlayer : MonoBehaviour
         inventoryAmountFree -= resourceDropped.inventorySpaceTaken;
     }
 
-    public void ResetInventory()
+    public virtual void ResetInventory()
     {
         inventoryAmountFree = maxInventorySize;
         inventory.Clear();

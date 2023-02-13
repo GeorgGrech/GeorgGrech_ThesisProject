@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Base : MonoBehaviour
@@ -8,10 +9,15 @@ public class Base : MonoBehaviour
     private bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction
     [SerializeField] private float depositTime = 3;
 
+    private GameObject canvasObject;
+    [SerializeField] private GameObject depositText;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        canvasObject = transform.Find("Canvas").gameObject;
+        canvasObject.GetComponent<Canvas>().worldCamera = Camera.main;
     }
 
     // Update is called once per frame
@@ -57,6 +63,7 @@ public class Base : MonoBehaviour
         {
             yield return new WaitForSeconds(depositTime);
             playerScript.AddScore(i); //Add points of object in player score
+            StartCoroutine(DisplayDepositText(playerScript.inventory[i]));
         }
         
         playerScript.ResetInventory();
@@ -74,5 +81,13 @@ public class Base : MonoBehaviour
         {
             StartCoroutine(ResourceDepositing(playerObject));
         }
+    }
+
+    private IEnumerator DisplayDepositText(Resource resource)
+    {
+        GameObject textObject = Instantiate(depositText, canvasObject.transform);
+        textObject.GetComponent<TextMeshProUGUI>().text = resource.resourceType.ToString() + " +" + resource.points + " points";
+        yield return new WaitForSeconds(depositTime);
+        Destroy(textObject);
     }
 }

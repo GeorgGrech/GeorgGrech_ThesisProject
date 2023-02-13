@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HumanPlayer : ParentPlayer
 {
@@ -10,10 +12,26 @@ public class HumanPlayer : ParentPlayer
     float gravity = 9.8f;
     float verticalSpeed = 0;
 
+    [SerializeField] private GameObject inventoryUI;
+    [SerializeField] private GameObject inventorySlot;
+
+    private GameObject[] inventorySlots;
+
     protected override void Start()
     {
-        base.Start();
+        Debug.Log("Player Start");
         controller = GetComponent<CharacterController>();
+        InitialiseInventory();
+        base.Start();
+    }
+
+    private void InitialiseInventory()
+    {
+        inventorySlots = new GameObject[maxInventorySize];
+        for (int i = 0; i < maxInventorySize; i++)
+        {
+            inventorySlots[i] = Instantiate(inventorySlot,inventoryUI.transform);
+        }
     }
 
     void Update()
@@ -54,6 +72,49 @@ public class HumanPlayer : ParentPlayer
         if (Input.GetKeyDown(KeyCode.E))
         {
             base.Interact();
+        }
+    }
+
+    public override void AddToInventory(Resource resourceDropped)
+    {
+        UpdateInventory(resourceDropped);
+        base.AddToInventory(resourceDropped);
+    }
+
+    public void UpdateInventory(Resource resourceDropped)
+    {
+        for (int i = 0; i < resourceDropped.inventorySpaceTaken; i++)
+        {
+            GameObject slotToUpdate = inventorySlots[maxInventorySize - inventoryAmountFree + i];
+
+            RawImage image = slotToUpdate.GetComponent<RawImage>();
+            if (resourceDropped.resourceType == Resource.Type.Wood)
+                image.color = new Color(75f/255f, 17f/255f, 12f/255f);
+            else if (resourceDropped.resourceType == Resource.Type.Iron)
+                image.color = new Color(63f/255f, 83f/255f, 87f/255f);
+
+            TextMeshProUGUI text = slotToUpdate.GetComponentInChildren<TextMeshProUGUI>();
+            text.text = resourceDropped.resourceType.ToString();
+            text.enabled = true;
+        }
+    }
+
+    public override void ResetInventory()
+    {
+        base.ResetInventory();
+        ClearInventoryUI();
+    }
+
+    public void ClearInventoryUI()
+    {
+        for (int i = 0; i < maxInventorySize; i++)
+        {
+            GameObject slotToUpdate = inventorySlots[i];
+            RawImage image = slotToUpdate.GetComponent<RawImage>();
+            image.color = Color.white;
+
+            TextMeshProUGUI text = slotToUpdate.GetComponentInChildren<TextMeshProUGUI>();
+            text.enabled = false;
         }
     }
 }

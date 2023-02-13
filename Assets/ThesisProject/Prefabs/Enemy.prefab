@@ -338,7 +338,8 @@ MonoBehaviour:
   navmeshSurface: {fileID: 0}
   maxBranchSize: 50
   distancePenalisePriority: 0.1
-  EndEpisodeScore: 2000
+  EndEpisodeScore: 1000
+  MaxEpisodes: 3
   resourceGatherRewardPriority: 0.25
   defaultRewardWeight: 0.05
   brains:

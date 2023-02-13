@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
+using UnityEngine.UI;
 
 /// <summary>
 /// Class for actual resource dropped by the Resource Object that will go into the player inventory then later deposited into the player base
@@ -35,6 +35,7 @@ public class Resource
 ///
 public class ResourceObject : MonoBehaviour
 {
+    public int totalDeposited;
     public int dropAmount;
     public float dropTime;
     public Resource resourceDropped;
@@ -96,6 +97,13 @@ public class ResourceObject : MonoBehaviour
     //Dropping the player resources in thier inventory
     public IEnumerator GiveResources(GameObject playerObject)
     {
+        Transform resourceCanvas = transform.Find("ResourceCanvas");
+        resourceCanvas.gameObject.SetActive(true);
+        resourceCanvas.GetComponent<Canvas>().worldCamera = Camera.main; //Setting event camera just for safety
+
+        Slider progressSlider = resourceCanvas.GetComponentInChildren<Slider>();
+        
+
         Debug.Log("Error track - Start of GiveResources");
         playerInteracting = true;
 
@@ -119,8 +127,9 @@ public class ResourceObject : MonoBehaviour
 
         int deposited; //Keep track of amount deposited to subtract from dropAmount in case of operation cancel
         //Add line for enemyPlayerScript
-        for (deposited = 0; deposited < dropAmount; deposited++)
+        for (deposited = totalDeposited; deposited < dropAmount; deposited++)
         {
+            progressSlider.value = (float)deposited / dropAmount;
             if (playerScript.IsInventoryFull(resourceDropped.inventorySpaceTaken))
             {
                 if (isEnemy && deposited == 0) //Penalize if inventory already full on first interaction
@@ -140,6 +149,7 @@ public class ResourceObject : MonoBehaviour
 
             Debug.Log("Item deposited");
         }
+        totalDeposited = deposited;
 
         playerScript.ResumeMovement(); //Resume player movement
 
@@ -150,8 +160,8 @@ public class ResourceObject : MonoBehaviour
         }
         else
         {
-            dropAmount -= deposited;
-            Debug.Log("Depositing interrupted. "+dropAmount+" items left.");
+            //dropAmount -= deposited;
+            Debug.Log("Depositing interrupted. "+(dropAmount-totalDeposited)+" items left.");
         }
 
         playerInteracting = false;
