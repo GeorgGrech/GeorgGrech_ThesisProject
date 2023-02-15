@@ -12,18 +12,22 @@ public class Base : MonoBehaviour
     private GameObject canvasObject;
     [SerializeField] private GameObject depositText;
 
-
     // Start is called before the first frame update
     void Start()
     {
         canvasObject = transform.Find("Canvas").gameObject;
         canvasObject.GetComponent<Canvas>().worldCamera = Camera.main;
+
+        if (tag.Equals("PlayerBase"))
+        {
+            GameObject.Find("PointerUI").GetComponent<BasePointerUI>().basePosition = transform.position;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     /*
