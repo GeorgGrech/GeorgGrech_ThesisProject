@@ -253,7 +253,7 @@ public class EnemyAgent : Agent
 
         while (!enemyPlayer.destinationReached)
         {
-            if((Vector3.Distance(transform.position,targetResource.position) < 2)&& validTimer == null) //If in vicinity, start coroutine
+            if((Vector3.Distance(transform.position,targetResource.position) < 2.5)&& validTimer == null) //If in vicinity, start coroutine
             {
                 validTimer = StartCoroutine(StartValidTimer(2));
             }

@@ -67,7 +67,8 @@ public class Base : MonoBehaviour
         {
             yield return new WaitForSeconds(depositTime);
             playerScript.AddScore(i); //Add points of object in player score
-            StartCoroutine(DisplayDepositText(playerScript.inventory[i]));
+            try { StartCoroutine(DisplayDepositText(playerScript.inventory[i])); }
+            catch { Debug.Log("Exception caught"); }
         }
         
         playerScript.ResetInventory();
