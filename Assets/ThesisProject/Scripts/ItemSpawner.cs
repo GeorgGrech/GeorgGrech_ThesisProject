@@ -43,9 +43,13 @@ public class ItemSpawner : MonoBehaviour
     private Vector3 playerBaseLocation; //Location in world of Player Base;
     private Vector3 enemyBaseLocation; //Location in world of Enemy Base;
 
+    private GameManager gameManager;
+
     // Start is called before the first frame update
     void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
         terrainSizeX = levelTerrain.terrainData.size.x;
         terrainSizeZ = levelTerrain.terrainData.size.z;
 
@@ -165,7 +169,7 @@ public class ItemSpawner : MonoBehaviour
         GameObject enemy = Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
         if (!agentTrainingLevel)
         {
-            GameObject.Find("GameManager").GetComponent<GameManager>().enemyAgent = enemy.GetComponent<EnemyAgent>();
+            gameManager.enemyAgent = enemy.GetComponent<EnemyAgent>();
         }
     }
 
@@ -185,6 +189,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnResources(); //Spawn Resources
         SpawnObstacles();
         RelocateEnemy(enemy);
+        gameManager.ResetScoreText();
     }
 
     public void RelocateEnemy(GameObject enemy) //Relocate enemy

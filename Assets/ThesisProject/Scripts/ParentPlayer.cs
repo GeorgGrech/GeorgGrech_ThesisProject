@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
-/// (Currently unused)
 /// The Parent Player class will contain functionality that is common to both human and AI opponent players,
 /// i.e Interacting with resources, interacting with bases, inventory checking, etc.
 /// Both human and AI player scripts may inherit this one.
@@ -22,9 +21,12 @@ public class ParentPlayer : MonoBehaviour
     [SerializeField] protected float movementSpeed; //To be used in charactercontroller for human player and A* scripts for AI player
     [SerializeField] protected float defaultMovementSpeed = 5; //To be used in charactercontroller for human player and A* scripts for AI player
 
+    public GameManager gameManager;
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         inventory = new List<Resource>();
         ResetInventory(); //Set inventory free amount to max
         ResumeMovement();
@@ -87,6 +89,8 @@ public class ParentPlayer : MonoBehaviour
     {
         score += inventory[index].points;
         Debug.Log(inventory[index].name + " with " + inventory[index].points + " points deposited. " + tag + " score is now: " + score);
+
+        gameManager.UpdateScoreText(tag, score);
     }
 
     public virtual void AddToInventory(Resource resourceDropped)

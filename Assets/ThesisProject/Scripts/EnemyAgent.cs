@@ -251,16 +251,25 @@ public class EnemyAgent : Agent
         bool validPos = true;
         Coroutine validTimer = null;
 
+
         while (!enemyPlayer.destinationReached)
         {
-            if((Vector3.Distance(transform.position,targetResource.position) < 2.5)&& validTimer == null) //If in vicinity, start coroutine
+            if (targetResource != null) //Circumvents rare error where player destroys resource wanted by enemy
             {
-                validTimer = StartCoroutine(StartValidTimer(2));
+                if((Vector3.Distance(transform.position,targetResource.position) < 2.5)&& validTimer == null) //If in vicinity, start coroutine
+                {
+                    validTimer = StartCoroutine(StartValidTimer(2));
+                }
+                yield return null;
+                if (validCounter == 2) //If still invalid after some time, break. 
+                {
+                    validPos = false;
+                    break;
+                }
             }
-            yield return null;
-            if (validCounter == 2) //If still invalid after some time, break. 
+            else
             {
-                validPos = false;
+                validPos = false; //Set valid pos as false to request decision again
                 break;
             }
         }
