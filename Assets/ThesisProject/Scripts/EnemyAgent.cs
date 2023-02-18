@@ -46,7 +46,7 @@ public class EnemyAgent : Agent
     [SerializeField] private int maxBranchSize;
 
     [SerializeField] private float distancePenalisePriority = 0.5f;
-    public int EndEpisodeScore = 2000;
+    //public int EndEpisodeScore = 2000;
     public int MaxEpisodes = 0;
     public float resourceGatherRewardPriority = 0.5f;
 
@@ -500,10 +500,12 @@ public class EnemyPlayer : ParentPlayer
         enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
         Debug.Log("Base deposit reward: " + inventory[index].points * enemyAgent.defaultRewardWeight);
 
+        /*
         if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)
         {
             enemyAgent.EndEpisode();
         }
+        */
     }
 
     public override void InventoryRemainderPenalize()

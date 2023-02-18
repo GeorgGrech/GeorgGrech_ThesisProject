@@ -90,7 +90,11 @@ public class ParentPlayer : MonoBehaviour
         score += inventory[index].points;
         Debug.Log(inventory[index].name + " with " + inventory[index].points + " points deposited. " + tag + " score is now: " + score);
 
-        gameManager.UpdateScoreText(tag, score);
+        try
+        {
+            gameManager.UpdateScoreText(tag, score);
+        }
+        catch { Debug.Log("Exception caught"); }
     }
 
     public virtual void AddToInventory(Resource resourceDropped)

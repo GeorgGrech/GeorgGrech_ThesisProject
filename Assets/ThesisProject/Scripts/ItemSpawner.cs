@@ -8,7 +8,7 @@ public class ItemSpawner : MonoBehaviour
 {
     public List<GameObject> ResourceObjects; //List of all resource objects in scene, to be used when training agent
 
-    [SerializeField] public bool agentTrainingLevel = false; //if level is used for training
+    //[SerializeField] public bool agentTrainingLevel = false; //if level is used for training
 
     //[SerializeField] private GameObject levelTerrainObject; //Level Terrain GameObject
     [SerializeField] private Terrain levelTerrain;
@@ -49,11 +49,14 @@ public class ItemSpawner : MonoBehaviour
     void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager.itemSpawner = this;
+
+        //gameManager.agentTrainingLevel = agentTrainingLevel;
 
         terrainSizeX = levelTerrain.terrainData.size.x;
         terrainSizeZ = levelTerrain.terrainData.size.z;
 
-        if (!agentTrainingLevel) //Don't attempt to relocate player and spawn player base if level is just for agent training 
+        if (gameManager.levelType == GameManager.LevelType.PlayerLevel) //Don't attempt to relocate player and spawn player base if level is just for agent training/evaluation
         {
             SpawnPlayerBase(); //Spawn Player Base
             RelocatePlayer(); //Move player to 
@@ -64,7 +67,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnObstacles();
         SpawnEnemy(); //Spawn Enemy near Enemy Base
 
-        
+        StartCoroutine(gameManager.Timer());
     }
 
     // Update is called once per frame
@@ -167,10 +170,7 @@ public class ItemSpawner : MonoBehaviour
     void SpawnEnemy() //Spawn Enemy agent
     {
         GameObject enemy = Instantiate(enemyPrefab, new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z),Quaternion.identity);
-        if (!agentTrainingLevel)
-        {
-            gameManager.enemyAgent = enemy.GetComponent<EnemyAgent>();
-        }
+        gameManager.enemyAgent = enemy.GetComponent<EnemyAgent>();
     }
 
     public void ResetLevel(GameObject enemy) //Used by Enemy Agent for resetting level for new episode
@@ -190,10 +190,12 @@ public class ItemSpawner : MonoBehaviour
         SpawnObstacles();
         RelocateEnemy(enemy);
         gameManager.ResetScoreText();
+        StartCoroutine(gameManager.Timer());
     }
 
     public void RelocateEnemy(GameObject enemy) //Relocate enemy
     {
+        Debug.Log("Relocating enemy");
         enemy.transform.position = new Vector3((enemyBaseLocation.x - playerSpawnDistance), enemyBaseLocation.y, enemyBaseLocation.z);
     }
 
