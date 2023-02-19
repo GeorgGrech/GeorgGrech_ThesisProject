@@ -63,14 +63,20 @@ public class Base : MonoBehaviour
 
         playerScript.PauseMovement();
 
+       // bool interrupted = false;
         for (int i = 0; i < playerScript.inventory.Count; i++)
         {
             yield return new WaitForSeconds(depositTime);
+            try
+            {
             playerScript.AddScore(i); //Add points of object in player score
-            try { StartCoroutine(DisplayDepositText(playerScript.inventory[i])); }
-            catch { Debug.Log("Exception caught"); }
+            StartCoroutine(DisplayDepositText(playerScript.inventory[i])); }
+            catch { Debug.Log("Exception caught");
+                //interrupted = true;
+                break;
+            }
         }
-        
+
         playerScript.ResetInventory();
         playerScript.ResumeMovement();
         playerInteracting = false;

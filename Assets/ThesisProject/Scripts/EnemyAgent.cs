@@ -148,46 +148,57 @@ public class EnemyAgent : Agent
                 Debug.Log("GetTrackingList Trace: 4");
 
                 //2. Save distance from resource to base
-                GameObject resourceObject = collider.transform.parent.gameObject;
-                ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
-                objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
-                Debug.Log("GetTrackingList Trace - Resource name:"+collider.name +" Resource position:"+collider.transform.position);
-                Coroutine validTimer = StartCoroutine(StartValidTimer(1));
-                while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
+                if (collider != null) //Check that collider still exists. Fixes error causewd when changing level for agent
                 {
-                    yield return null;
-                    if (validCounter == 1) //If still invalid after some time, break
+
+                    GameObject resourceObject = collider.transform.parent.gameObject;
+                    ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
+                    objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
+                    Debug.Log("GetTrackingList Trace - Resource name:" + collider.name + " Resource position:" + collider.transform.position);
+                    Coroutine validTimer = StartCoroutine(StartValidTimer(1));
+                    while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                     {
-                        validNav = false;
-                        break;
+                        yield return null;
+                        if (validCounter == 1) //If still invalid after some time, break
+                        {
+                            validNav = false;
+                            break;
+                        }
                     }
-                }
-                StopCoroutine(validTimer);
-                float distanceFromBase = 0;
-                if (validNav)
-                {
-                    distanceFromPlayer = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
-                    Debug.Log("Valid nav, using nav distance");
+                    StopCoroutine(validTimer);
+                    float distanceFromBase = 0;
+                    if (validNav)
+                    {
+                        distanceFromPlayer = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
+                        Debug.Log("Valid nav, using nav distance");
+                    }
+                    else
+                    {
+                        distanceFromPlayer = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
+                        Debug.Log("Invalid nav, using Vector3.distance");
+                    }
+                    Debug.Log("GetTrackingList Trace: 5");
+
+                    resourcesTrackingList.Add(new ResourceData()
+                    {
+                        resourceObject = resourceObject,
+                        //Save type
+                        type = resourceObject.GetComponent<ResourceObject>().resourceDropped.resourceType,
+                        distanceFromPlayer = distanceFromPlayer,
+                        distanceFromBase = distanceFromBase
+
+                    });
+                    resourceCounter++;
+                    //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
+                    Debug.Log("GetTrackingList Trace: 6");
                 }
                 else
                 {
-                    distanceFromPlayer = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
-                    Debug.Log("Invalid nav, using Vector3.distance");
+                    Debug.Log("Null collider. Breaking...");
+                    break; //break for loop and avoid checking other colliders
                 }
-                Debug.Log("GetTrackingList Trace: 5");
 
-                resourcesTrackingList.Add(new ResourceData()
-                {
-                    resourceObject = resourceObject,
-                    //Save type
-                    type = resourceObject.GetComponent<ResourceObject>().resourceDropped.resourceType,
-                    distanceFromPlayer = distanceFromPlayer,
-                    distanceFromBase = distanceFromBase
 
-                });
-                resourceCounter++;
-                //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
-                Debug.Log("GetTrackingList Trace: 6");
             }
             enemyPlayer.ResumeMovement(); //Resume movement again
 
@@ -332,9 +343,7 @@ public class EnemyAgent : Agent
     {
         if (!firstTimeStart) //Double check so that this function doesn't run on start
         {
-            itemSpawner.ResetLevel(this.gameObject);
-            enemyPlayer.ResetInventory();
-            enemyPlayer.score = 0;
+            ResetLevelAndAgent();
             
             StopAllCoroutines(); //Stop any actions
             StartCoroutine(DelayedStart()); //Start actions again with delay
@@ -344,6 +353,14 @@ public class EnemyAgent : Agent
         {
             EditorApplication.ExitPlaymode();
         }
+    }
+
+    public void ResetLevelAndAgent()
+    {
+        itemSpawner.ResetLevel(this.gameObject,false);
+        enemyPlayer.ResetInventory();
+        //enemyPlayer.ResumeMovement();
+        enemyPlayer.score = 0;
     }
 
     public void Penalty(float penalty)
@@ -356,6 +373,21 @@ public class EnemyAgent : Agent
     #region Agent methods
     public override void CollectObservations(VectorSensor sensor)
     {
+        try
+        {
+            if (resourcesTrackingList != null && resourcesTrackingList.Count > 0)
+            {
+                foreach (ResourceData resourceData in resourcesTrackingList)
+                {
+                    sensor.AddObservation(resourceData.distanceFromBase);
+                    sensor.AddObservation(resourceData.distanceFromPlayer);
+                    sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
+                }
+                //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
+            }
+
+            sensor.AddObservation(enemyPlayer.inventoryAmountFree); //Keep track of inventory
+        }
         /* Observations to collect
          * -(All resources) Distance from enemy
          * -(All resources) Distance from base
@@ -368,17 +400,10 @@ public class EnemyAgent : Agent
         sensor.AddObservation(this.transform.localPosition); // Position of enemy
         */
 
-        if (resourcesTrackingList != null && resourcesTrackingList.Count > 0)
+        catch
         {
-            foreach (ResourceData resourceData in resourcesTrackingList)
-            {
-                sensor.AddObservation(resourceData.distanceFromBase);
-                sensor.AddObservation(resourceData.distanceFromPlayer);
-                sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
-            }
-            //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
+            Debug.Log("Exception caught in observations");
         }
-        sensor.AddObservation(enemyPlayer.inventoryAmountFree); //Keep track of inventory
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -456,6 +481,12 @@ public class EnemyAgent : Agent
         NNModel brain = brains[Random.Range(0, brains.Length)];
         SetModel("ResourceAgent",brain);
         Debug.Log("Switched brain to: " + brain.name);
+    }
+
+
+    public int GetScore()
+    {
+        return enemyPlayer.score;
     }
 }
 #endregion

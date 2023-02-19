@@ -173,7 +173,7 @@ public class ItemSpawner : MonoBehaviour
         gameManager.enemyAgent = enemy.GetComponent<EnemyAgent>();
     }
 
-    public void ResetLevel(GameObject enemy) //Used by Enemy Agent for resetting level for new episode
+    public void ResetLevel(GameObject enemy, bool newEnemy) //Used by Enemy Agent for resetting level for new episode
     {
         //itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
@@ -188,7 +188,16 @@ public class ItemSpawner : MonoBehaviour
  
         SpawnResources(); //Spawn Resources
         SpawnObstacles();
-        RelocateEnemy(enemy);
+
+        if (!newEnemy)
+            RelocateEnemy(enemy);
+        else
+        {
+            Destroy(enemy);
+            SpawnEnemy();
+        }
+
+
         gameManager.ResetScoreText();
         StartCoroutine(gameManager.Timer());
     }

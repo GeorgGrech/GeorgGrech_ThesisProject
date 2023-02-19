@@ -1,9 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using TMPro;
 using Unity.Barracuda;
+using UnityEditor;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -20,10 +23,12 @@ public class GameManager : MonoBehaviour
     //public bool agentEvaluationLevel;
     [Space(10)]
     [Header("Agent Model Evaluation")]
-    [SerializeField] private NNModel[] evaluationBrains;
+    [SerializeField] private NNModel[] evaluationModels;
     [SerializeField] private string modelPath;
+    private int currentModel = 0;
 
     public ItemSpawner itemSpawner;
+    StringBuilder sb;
 
     public enum LevelType
     {
@@ -39,7 +44,8 @@ public class GameManager : MonoBehaviour
     {
         if(levelType == LevelType.AgentEvaluation)
         {
-            evaluationBrains = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
+            sb = new StringBuilder("ModelNumber,ModelName,FinalScore");
+            evaluationModels = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
         }
     }
 
@@ -73,6 +79,12 @@ public class GameManager : MonoBehaviour
         var ts = TimeSpan.FromSeconds(currentSeconds);
         timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
 
+
+        if (levelType == LevelType.AgentEvaluation) //If is evaluation level, set agent brain to correct one to evaluate
+        {
+            enemyAgent.SetModel("ResourceAgent", evaluationModels[currentModel]);
+        }
+
         while (currentSeconds > 0)
         {
             if (levelType == LevelType.AgentTraining)
@@ -94,7 +106,55 @@ public class GameManager : MonoBehaviour
         else if (levelType == LevelType.AgentEvaluation)
         {
             Debug.Log("Writing Evaluation");
+
+            sb.Append('\n')
+                .Append(currentModel.ToString()).Append(',')
+                .Append(evaluationModels[currentModel].name).Append(',')
+                .Append(enemyAgent.GetScore().ToString()).Append(',');
+
+            currentModel++; //set next model to evaluate
+
+
+            if (currentModel >= evaluationModels.Length) //If reached end of list save file and exit playmode
+            {
+                SaveToFile(sb.ToString());
+
+                EditorApplication.ExitPlaymode();
+            }
+            else
+            {
+                //enemyAgent.ResetLevelAndAgent();
+                itemSpawner.ResetLevel(enemyAgent.gameObject, true);
+            }
         }
+    }
+
+    public void SaveToFile(string toSave)
+    {
+#if UNITY_EDITOR
+        var folder = Application.streamingAssetsPath;
+
+        if (!Directory.Exists(folder))
+            Directory.CreateDirectory(folder);
+#else
+    var folder = Application.persistentDataPath;
+#endif
+
+        var filePath = Path.Combine(folder, "modelEvaluation.csv");
+
+        using (var writer = new StreamWriter(filePath, false))
+        {
+            writer.Write(toSave);
+        }
+
+        // Or just
+        //File.WriteAllText(content);
+
+        Debug.Log($"CSV file written to \"{filePath}\"");
+
+#if UNITY_EDITOR
+        AssetDatabase.Refresh();
+#endif
     }
 
     /*
