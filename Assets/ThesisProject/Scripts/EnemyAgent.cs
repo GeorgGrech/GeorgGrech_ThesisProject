@@ -133,7 +133,7 @@ public class EnemyAgent : Agent
 
             resourcesTrackingList = new List<ResourceData>();
 
-            Debug.Log("GetTrackingList Trace: 3");
+            //Debug.Log("GetTrackingList Trace: 3");
             foreach (Collider collider in hits)
             {
                 bool validNav = true;
@@ -145,7 +145,7 @@ public class EnemyAgent : Agent
                 }
                 float distanceFromPlayer; 
 
-                Debug.Log("GetTrackingList Trace: 4");
+                //Debug.Log("GetTrackingList Trace: 4");
 
                 //2. Save distance from resource to base
                 if (collider != null) //Check that collider still exists. Fixes error causewd when changing level for agent
@@ -154,7 +154,7 @@ public class EnemyAgent : Agent
                     GameObject resourceObject = collider.transform.parent.gameObject;
                     ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
                     objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
-                    Debug.Log("GetTrackingList Trace - Resource name:" + collider.name + " Resource position:" + collider.transform.position);
+                    //Debug.Log("GetTrackingList Trace - Resource name:" + collider.name + " Resource position:" + collider.transform.position);
                     Coroutine validTimer = StartCoroutine(StartValidTimer(1));
                     while (objectScript.GetPathRemainingDistance() == -1) //Keep trying until value is valid
                     {
@@ -170,14 +170,14 @@ public class EnemyAgent : Agent
                     if (validNav)
                     {
                         distanceFromPlayer = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
-                        Debug.Log("Valid nav, using nav distance");
+                        //Debug.Log("Valid nav, using nav distance");
                     }
                     else
                     {
                         distanceFromPlayer = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
                         Debug.Log("Invalid nav, using Vector3.distance");
                     }
-                    Debug.Log("GetTrackingList Trace: 5");
+                    //Debug.Log("GetTrackingList Trace: 5");
 
                     resourcesTrackingList.Add(new ResourceData()
                     {
@@ -190,7 +190,7 @@ public class EnemyAgent : Agent
                     });
                     resourceCounter++;
                     //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
-                    Debug.Log("GetTrackingList Trace: 6");
+                    //Debug.Log("GetTrackingList Trace: 6");
                 }
                 else
                 {
@@ -249,15 +249,15 @@ public class EnemyAgent : Agent
     /// <returns></returns>
     public IEnumerator GatherResource(Transform targetResource, float distToPlayer, float distToBase)
     {
-        Debug.Log("GatherResources Error Track 1");
+        //Debug.Log("GatherResources Error Track 1");
         //Penalize based on distances
         AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
         AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
-        Debug.Log("GatherResources Error Track 2");
+        //Debug.Log("GatherResources Error Track 2");
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
 
-        Debug.Log("GatherResources Error Track 3");
+        //Debug.Log("GatherResources Error Track 3");
         // 2. Detect Destination Reached
         bool validPos = true;
         Coroutine validTimer = null;
@@ -296,9 +296,19 @@ public class EnemyAgent : Agent
         {
             // 3. Interact with item
             //Included in GoToDestination
+            //yield return new WaitForSecondsRealtime(.1f); //Buffer to ensure that interact has been activated
 
             // 4. Wait until completion or interruption
             Debug.Log("GatherResources Error Track 4");
+
+            /*int buffer = 0;
+            int bufferPeriod = 10;
+
+            while (buffer < bufferPeriod) //Short buffer to make sure enemy has interacted
+            {
+                buffer++;
+            }*/
+
             while (enemyPlayer.playerInteracting)
             {
                 yield return null;
@@ -541,10 +551,9 @@ public class EnemyPlayer : ParentPlayer
 
     public override void InventoryRemainderPenalize()
     {
-        enemyAgent.Penalty(maxInventorySize-inventoryAmountFree);
+        enemyAgent.Penalty(inventoryAmountFree);
     }
 
-    //Technically the same as InventoryRemainderPenalize
     public override void FullInventoryPenalize()
     {
         enemyAgent.Penalty(maxInventorySize-inventoryAmountFree);

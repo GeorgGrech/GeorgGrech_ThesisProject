@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ResourceObjects: []
-  agentTrainingLevel: 0
   levelTerrain: {fileID: 0}
   playerBase: {fileID: 507343056718839266, guid: e733fb8f5a619f8408fbc2dc101c45b1,
     type: 3}
@@ -56,8 +55,8 @@ MonoBehaviour:
     type: 3}
   resource2: {fileID: 1490637206039979100, guid: 8995ee5586a95fd45b77a11b6a0dc0c5,
     type: 3}
-  resourceSpacing: 7
-  resourceSpawnShift: 3
+  resourceSpacing: 6
+  resourceSpawnShift: 1.6
   baseDistance: 13
   spawnObstacles: 1
   obstacles:

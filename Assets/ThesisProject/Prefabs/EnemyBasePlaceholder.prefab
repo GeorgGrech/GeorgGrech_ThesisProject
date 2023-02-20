@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 5004896502586391647}
   - component: {fileID: 3564828068550248751}
   - component: {fileID: 6154022910346892940}
-  - component: {fileID: 3555978194007664294}
   - component: {fileID: 3260432923383956244}
   - component: {fileID: -221434141461707368}
   - component: {fileID: 5483124472166636017}
+  - component: {fileID: 7942839625182665879}
   m_Layer: 0
   m_Name: EnemyBasePlaceholder
   m_TagString: EnemyBase
@@ -87,19 +87,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &3555978194007664294
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5520394253958327883}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &3260432923383956244
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -144,6 +131,19 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!65 &7942839625182665879
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5520394253958327883}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &8884535945815814454
 GameObject:
   m_ObjectHideFlags: 0

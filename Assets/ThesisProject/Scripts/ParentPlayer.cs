@@ -62,7 +62,8 @@ public class ParentPlayer : MonoBehaviour
 
     protected virtual void OnTriggerExit(Collider other)
     {
-        interactableObject = null;
+        if(other.gameObject == interactableObject) //Make sure trigger exit doesnt clear the wrong object
+            interactableObject = null;
     }
 
     /*

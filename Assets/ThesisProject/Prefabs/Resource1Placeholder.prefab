@@ -126,10 +126,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07eea45903e8ce14497e13b63c3001a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  totalDeposited: 0
   dropAmount: 4
   dropTime: 3
   resourceDropped:
     name: Wood
+    resourceType: 0
     points: 5
     inventorySpaceTaken: 1
   navmeshAgent: {fileID: 0}
