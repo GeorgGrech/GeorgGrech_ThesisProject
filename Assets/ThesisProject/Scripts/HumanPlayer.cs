@@ -36,9 +36,12 @@ public class HumanPlayer : ParentPlayer
 
     void Update()
     {
-        MovementInput();
-        RotationInput();
-        KeyboardInput();
+        if (!gameManager.isGameFinished)
+        {
+            MovementInput();
+            RotationInput();
+            KeyboardInput();
+        }
     }
 
     void MovementInput()

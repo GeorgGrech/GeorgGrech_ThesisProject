@@ -30,6 +30,17 @@ public class GameManager : MonoBehaviour
     public ItemSpawner itemSpawner;
     StringBuilder sb;
 
+
+    [Space(10)]
+    [Header("Game End")]
+    public bool isGameFinished;
+    public GameObject endGamePanel;
+    public TextMeshProUGUI endGameHeader;
+    public TextMeshProUGUI endGamePlayerScore;
+    public TextMeshProUGUI endGameEnemyScore;
+
+    public GameObject[] endGameTextObjects;
+
     public enum LevelType
     {
         PlayerLevel,
@@ -127,6 +138,37 @@ public class GameManager : MonoBehaviour
                 itemSpawner.ResetLevel(enemyAgent.gameObject, true);
             }
         }
+
+        else //Player Level
+        {
+            isGameFinished = true;
+            StartCoroutine(FinishGame());
+        }
+    }
+
+    private IEnumerator FinishGame()
+    {
+        enemyAgent.enabled = false; //Disable enemy script to stop movement
+
+        if (int.Parse(playerScoreText.text) > int.Parse(enemyScoreText.text)) //Win
+            endGameHeader.text = "YOU WIN!";
+
+        else if (int.Parse(playerScoreText.text) < int.Parse(enemyScoreText.text)) //Draw
+            endGameHeader.text = "YOU LOSE!";
+
+        else //Lose
+            endGameHeader.text = "DRAW REACHED!";
+
+        endGamePlayerScore.text = playerScoreText.text;
+        endGameEnemyScore.text = enemyScoreText.text;
+
+        endGamePanel.SetActive(true);
+        foreach (GameObject textObject in endGameTextObjects)
+        {
+            yield return new WaitForSeconds(2);
+            textObject.SetActive(true);
+        }
+
     }
 
     public void SaveToFile(string toSave)

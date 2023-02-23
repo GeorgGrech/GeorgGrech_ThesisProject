@@ -76,9 +76,10 @@ public class BasePointerUI : MonoBehaviour
         fromPosition.z = 0f;
         Vector3 dir = (toPosition - fromPosition).normalized;
 
-
+        /*
         Debug.Log("toPosition: " + toPosition);
         Debug.Log("fromPosition: " + fromPosition);
+        */
 
         float angle = UtilsClass.GetAngleFromVectorFloat(dir);
         arrowRectTransform.localEulerAngles = new Vector3(0, 0, angle);

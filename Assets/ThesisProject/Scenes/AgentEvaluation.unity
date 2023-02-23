@@ -684,11 +684,6 @@ PrefabInstance:
       propertyPath: playerScoreText
       value: 
       objectReference: {fileID: 1540566354}
-    - target: {fileID: 2560772736527715062, guid: c98280baf71d0cf49b854a1052dbd713,
-        type: 3}
-      propertyPath: timerTotalSeconds
-      value: 120
-      objectReference: {fileID: 0}
     - target: {fileID: 2560772736527715063, guid: c98280baf71d0cf49b854a1052dbd713,
         type: 3}
       propertyPath: m_RootOrder

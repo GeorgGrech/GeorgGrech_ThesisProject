@@ -139,7 +139,7 @@ public class EnemyAgent : Agent
                 bool validNav = true;
                 //1. Save distance from player to resource
                 navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
-                while (GetPathRemainingDistance() == -1) //Keep trying until value is valid
+                while (GetPathRemainingDistance() == -1 && collider!=null) //Keep trying until value is valid
                 {
                     yield return null;
                 }
@@ -351,6 +351,7 @@ public class EnemyAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        Debug.Log("Training currently on episode: "+(CompletedEpisodes+1)+" / "+MaxEpisodes);
         if (!firstTimeStart) //Double check so that this function doesn't run on start
         {
             ResetLevelAndAgent();
@@ -359,10 +360,11 @@ public class EnemyAgent : Agent
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
 
-        if(MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every 2 completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
+        /*
+        if(MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every x amount of completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
         {
             EditorApplication.ExitPlaymode();
-        }
+        }*/
     }
 
     public void ResetLevelAndAgent()
