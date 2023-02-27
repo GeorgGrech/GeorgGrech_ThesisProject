@@ -40,7 +40,7 @@ public class ResourceObject : MonoBehaviour
     public float dropTime;
     public Resource resourceDropped;
 
-    private bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction or enemy and player interacting with same resource
+    public bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction or enemy and player interacting with same resource
 
     //private GameManager gameManager;
     private ItemSpawner itemSpawner;

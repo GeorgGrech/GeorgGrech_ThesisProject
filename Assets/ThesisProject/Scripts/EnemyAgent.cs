@@ -218,6 +218,7 @@ public class EnemyAgent : Agent
 
     private IEnumerator StartValidTimer(float time)
     {
+        Debug.Log("ValidTimer - Started");
         validCounter = 0;
         while (validCounter < time)
         {
@@ -288,8 +289,9 @@ public class EnemyAgent : Agent
 
         if (!validPos)
         {
-            Debug.Log("Destination not reached successfully. Interrupting action and requesting decision...");
-            RequestDecision();
+            Debug.Log("(ValidTimer break) Destination not reached successfully. Interrupting action and and rescanning.");
+            //RequestDecision();
+            StartCoroutine(GetTrackingList()); //If not reached succeessfully rescan to try another nearby resource
         }
 
         else //If destination reached successfully
@@ -300,13 +302,35 @@ public class EnemyAgent : Agent
 
             // 4. Wait until completion or interruption
             Debug.Log("GatherResources Error Track 4");
-
-            yield return new WaitForSecondsRealtime(.2f);
-
-            while (enemyPlayer.playerInteracting)
+            validTimer = null;
+            //yield return new WaitForSecondsRealtime(.2f);
+            if(validTimer == null)
             {
-                yield return null;
+                validTimer = StartCoroutine(StartValidTimer(2));
             }
+
+            if (enemyPlayer.interactableObject) //If interactableObject is null, for whatever reason, break operation and rescan
+            {
+                //ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
+                while (enemyPlayer.playerInteracting)
+                {
+                    yield return null;
+                    /*if(resourceObject != null)
+                    {
+                        if (validCounter == 2 && !resourceObject.playerInteracting)
+                        {
+                            Debug.Log("(ValidTimer break) Interaction not successful. Breaking and rescanning.");
+                            break; //If agent gets stuck on this stage, skip immediately to rescan
+                        }
+                    }*/
+                }
+            }
+
+            else
+            {
+                Debug.Log("interactableObject is null. Rescanning list.");
+            }
+            //if (validTimer != null) StopCoroutine(validTimer);
             Debug.Log("Action completed. Interaction successful or interrupted.");
             Debug.Log("GatherResources Error Track 5");
 

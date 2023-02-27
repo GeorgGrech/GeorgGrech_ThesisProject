@@ -153,10 +153,10 @@ public class GameManager : MonoBehaviour
         if (int.Parse(playerScoreText.text) > int.Parse(enemyScoreText.text)) //Win
             endGameHeader.text = "YOU WIN!";
 
-        else if (int.Parse(playerScoreText.text) < int.Parse(enemyScoreText.text)) //Draw
+        else if (int.Parse(playerScoreText.text) < int.Parse(enemyScoreText.text)) //Lose
             endGameHeader.text = "YOU LOSE!";
 
-        else //Lose
+        else //Draw
             endGameHeader.text = "DRAW REACHED!";
 
         endGamePlayerScore.text = playerScoreText.text;
