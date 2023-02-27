@@ -301,13 +301,7 @@ public class EnemyAgent : Agent
             // 4. Wait until completion or interruption
             Debug.Log("GatherResources Error Track 4");
 
-            /*int buffer = 0;
-            int bufferPeriod = 10;
-
-            while (buffer < bufferPeriod) //Short buffer to make sure enemy has interacted
-            {
-                buffer++;
-            }*/
+            yield return new WaitForSecondsRealtime(.2f);
 
             while (enemyPlayer.playerInteracting)
             {
@@ -360,11 +354,11 @@ public class EnemyAgent : Agent
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
 
-        /*
+        
         if(MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every x amount of completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
         {
             EditorApplication.ExitPlaymode();
-        }*/
+        }
     }
 
     public void ResetLevelAndAgent()
@@ -531,6 +525,7 @@ public class EnemyPlayer : ParentPlayer
         enemyAgent = gameObject.GetComponent<EnemyAgent>(); //Access enemyAgent for point rewards
     }
 
+    [ContextMenu("Interact")]
     public override void Interact()
     {
         Debug.Log("Error track - Interact");

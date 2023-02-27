@@ -45,6 +45,7 @@ public class ParentPlayer : MonoBehaviour
     // Player interacts with world (ie. human player presses interaction key). Will carry out appropriate action if within trigger of base or resource
     public virtual void Interact()
     {
+        playerInteracting = true; //Set to true by default. This should fix missed interaction in GatherResource
         Debug.Log("Interact Action requested by "+gameObject.tag);
         if(interactableObject != null)
         {
