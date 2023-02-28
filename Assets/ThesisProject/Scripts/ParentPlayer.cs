@@ -107,12 +107,12 @@ public class ParentPlayer : MonoBehaviour
         inventory.Clear();
     }
 
-    public void PauseMovement()
+    public virtual void PauseMovement()
     {
         movementSpeed = 0;
     }
 
-    public void ResumeMovement()
+    public virtual void ResumeMovement()
     {
         movementSpeed = defaultMovementSpeed;
     }

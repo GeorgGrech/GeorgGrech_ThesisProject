@@ -570,6 +570,19 @@ public class EnemyPlayer : ParentPlayer
         */
     }
 
+
+    public override void PauseMovement()
+    {
+        base.PauseMovement();
+        if(navmeshAgent) navmeshAgent.speed = movementSpeed;
+    }
+
+    public override void ResumeMovement()
+    {
+        base.ResumeMovement();
+        if (navmeshAgent) navmeshAgent.speed = movementSpeed;
+    }
+
     public override void InventoryRemainderPenalize()
     {
         enemyAgent.Penalty(inventoryAmountFree);
