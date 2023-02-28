@@ -47,6 +47,7 @@ public class EnemyAgent : Agent
 
     [SerializeField] private float distancePenalisePriority = 0.5f;
     //public int EndEpisodeScore = 2000;
+    public bool endTrainingWithMaxEpisodes;
     public int MaxEpisodes = 0;
     public float resourceGatherRewardPriority = 0.5f;
 
@@ -58,10 +59,11 @@ public class EnemyAgent : Agent
     //private List<GameObject> resourceObjects;
 
     //public Transform target;
+
+    private int validCounter; //Counter used when checking if action hasn't gotten stuck
+    private bool isTracking; //used to check if agent is atteempting tracking. If taking too long and still in this state, break
+
     // Start is called before the first frame update
-
-    private int validCounter;
-
     void Start()
     {
         //playerScript = gameObject.GetComponent<ParentPlayer>();
@@ -133,6 +135,8 @@ public class EnemyAgent : Agent
 
             resourcesTrackingList = new List<ResourceData>();
 
+            isTracking = true;
+            Coroutine trackTimer = StartCoroutine(TrackingListForceStopTimer(8));
             //Debug.Log("GetTrackingList Trace: 3");
             foreach (Collider collider in hits)
             {
@@ -201,8 +205,8 @@ public class EnemyAgent : Agent
 
             }
             enemyPlayer.ResumeMovement(); //Resume movement again
-
-
+            StopCoroutine(trackTimer);
+            isTracking = false;
             RequestDecision(); //After getting list, request decision
 
             /*
@@ -225,6 +229,25 @@ public class EnemyAgent : Agent
             yield return new WaitForSecondsRealtime(1);
             validCounter++;
         }
+    }
+
+    private IEnumerator TrackingListForceStopTimer(float time)
+    {
+        Debug.Log("TrackingListForceStopTimer - Started");
+        int counter = 0;
+        while (counter < time)
+        {
+            yield return new WaitForSecondsRealtime(1);
+            counter++;
+        }
+
+        if (isTracking)
+        {
+            Debug.Log("TrackingListForceStopTimer - Breaking");
+            isTracking = false;
+            RequestDecision(); //If enough time has passed and GetTracking hasn't concluded, just jump to decision
+        }
+
     }
 
     public float GetPathRemainingDistance()
@@ -311,18 +334,18 @@ public class EnemyAgent : Agent
 
             if (enemyPlayer.interactableObject) //If interactableObject is null, for whatever reason, break operation and rescan
             {
-                //ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
+                ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
                 while (enemyPlayer.playerInteracting)
                 {
                     yield return null;
-                    /*if(resourceObject != null)
+                    if(resourceObject != null)
                     {
                         if (validCounter == 2 && !resourceObject.playerInteracting)
                         {
                             Debug.Log("(ValidTimer break) Interaction not successful. Breaking and rescanning.");
                             break; //If agent gets stuck on this stage, skip immediately to rescan
                         }
-                    }*/
+                    }
                 }
             }
 
@@ -378,10 +401,12 @@ public class EnemyAgent : Agent
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
 
-        
-        if(MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every x amount of completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
+        if (endTrainingWithMaxEpisodes)
         {
-            EditorApplication.ExitPlaymode();
+            if (MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every x amount of completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
+            {
+                EditorApplication.ExitPlaymode();
+            }
         }
     }
 
@@ -539,14 +564,20 @@ public class EnemyPlayer : ParentPlayer
     public bool destinationReached = false;
     private EnemyAgent enemyAgent;
 
+    StatsRecorder statsRecorder;
+
     protected override void Start()
     {
         base.Start();
+        statsRecorder = Academy.Instance.StatsRecorder;
+
         navmeshAgent = GetComponent<NavMeshAgent>();
 
         navmeshAgent.speed = movementSpeed;
 
         enemyAgent = gameObject.GetComponent<EnemyAgent>(); //Access enemyAgent for point rewards
+
+
     }
 
     [ContextMenu("Interact")]
@@ -560,6 +591,7 @@ public class EnemyPlayer : ParentPlayer
     {
         base.AddScore(index);
         enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
+        statsRecorder.Add("Score", enemyAgent.GetScore()); //Display score on TensorBoard
         Debug.Log("Base deposit reward: " + inventory[index].points * enemyAgent.defaultRewardWeight);
 
         /*

@@ -46,13 +46,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07eea45903e8ce14497e13b63c3001a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  totalDeposited: 0
   dropAmount: 3
   dropTime: 3
   resourceDropped:
     name: Iron
     resourceType: 1
-    points: 15
+    points: 20
     inventorySpaceTaken: 4
+  playerInteracting: 0
   navmeshAgent: {fileID: 8447773942280733013}
 --- !u!135 &1490637206039979103
 SphereCollider:
