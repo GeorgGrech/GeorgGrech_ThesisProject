@@ -198,7 +198,7 @@ public class EnemyAgent : Agent
                         distanceFromPlayer = distanceFromPlayer,
                         distanceFromBase = distanceFromBase,
 
-                        takenAmount = resourceObjectScript.totalDeposited / resourceObjectScript.dropAmount
+                        takenAmount = resourceObjectScript.totalDeposited / (float)resourceObjectScript.dropAmount
 
                     });
                     resourceCounter++;
