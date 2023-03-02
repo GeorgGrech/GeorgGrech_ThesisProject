@@ -92,9 +92,11 @@ public class HumanPlayer : ParentPlayer
 
             RawImage image = slotToUpdate.GetComponent<RawImage>();
             if (resourceDropped.resourceType == Resource.Type.Wood)
-                image.color = new Color(75f/255f, 17f/255f, 12f/255f);
+                image.color = new Color(75f / 255f, 17f / 255f, 12f / 255f);
             else if (resourceDropped.resourceType == Resource.Type.Iron)
-                image.color = new Color(63f/255f, 83f/255f, 87f/255f);
+                image.color = new Color(63f / 255f, 83f / 255f, 87f / 255f);
+            else if (resourceDropped.resourceType == Resource.Type.Gold)
+                image.color = new Color(173 / 255f, 83f / 167, 0f / 255f);
 
             TextMeshProUGUI text = slotToUpdate.GetComponentInChildren<TextMeshProUGUI>();
             text.text = resourceDropped.resourceType.ToString();

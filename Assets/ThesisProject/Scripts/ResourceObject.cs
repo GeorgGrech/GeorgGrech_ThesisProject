@@ -19,6 +19,7 @@ public class Resource
     {
         Wood,
         Iron,
+        Gold,
         LastItem //Used solely as marker to determine enum range. Used in EnemyAgent.
     }
 

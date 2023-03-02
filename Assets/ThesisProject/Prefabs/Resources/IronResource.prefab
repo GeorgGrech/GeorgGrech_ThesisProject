@@ -52,7 +52,7 @@ MonoBehaviour:
   resourceDropped:
     name: Iron
     resourceType: 1
-    points: 20
+    points: 15
     inventorySpaceTaken: 4
   playerInteracting: 0
   navmeshAgent: {fileID: 8447773942280733013}

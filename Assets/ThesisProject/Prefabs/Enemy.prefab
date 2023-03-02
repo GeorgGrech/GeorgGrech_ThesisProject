@@ -270,7 +270,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 68b52fdd15a034d46a05b4754b1cce62, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 0cbd11b48fb0c1a42a4f1b9fa87b3e95, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: ResourceAgent
@@ -337,10 +337,11 @@ MonoBehaviour:
   initialScanRange: 15
   navmeshSurface: {fileID: 0}
   maxBranchSize: 50
-  distancePenalisePriority: 0.1
+  distancePenalisePriority: 0.5
+  endTrainingWithMaxEpisodes: 1
   MaxEpisodes: 12
   resourceGatherRewardPriority: 0.25
-  defaultRewardWeight: 0.05
+  defaultRewardWeight: 0.03
   brains:
   - {fileID: 0}
   - {fileID: 0}

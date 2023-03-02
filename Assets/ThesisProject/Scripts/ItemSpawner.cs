@@ -21,8 +21,9 @@ public class ItemSpawner : MonoBehaviour
     //[SerializeField] private GameObject playerPrefab; //Player prefab
     [SerializeField] private GameObject enemyPrefab; //Enemy agent
 
-    [SerializeField] private GameObject resource1; //First resource - eg. Tree
-    [SerializeField] private GameObject resource2; //First resource - eg. Iron Mine
+    //[SerializeField] private GameObject resource1; //First resource - eg. Tree
+    //[SerializeField] private GameObject resource2; //First resource - eg. Iron Mine
+    [SerializeField] private GameObject[] resources; //List of resources
     private GameObject ResourceParent; //World object to contain all resource gameobjects for tidiness
 
     [SerializeField] private int resourceSpacing; //Spacing between resources
@@ -36,6 +37,7 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private float obstacleSpawnShift; //Amount of random shift from original obstacle spawn
     [SerializeField] private float obstacleMinResize; //Min amount possible of x/z scaling
     [SerializeField] private float obstacleMaxResize; //Max amount possible of x/z scaling
+    [SerializeField] private float obstacleExtraBaseSpacing; //Increase of baseDistance especially for obstacles
 
     [SerializeField] private float baseCenterOffset; //Max random offset from center of map for base spawn
     [SerializeField] private float playerSpawnDistance; //Spawn distance for both player and enemy for their respective bases
@@ -125,12 +127,16 @@ public class ItemSpawner : MonoBehaviour
                 if((Vector3.Distance(resourcePosition,playerBaseLocation)>baseDistance)&& //Distant from Player Base
                     (Vector3.Distance(resourcePosition, enemyBaseLocation) > baseDistance)) //Distant from Enemy Base
                 {
-                    int randomNum = Random.Range(0, 6); //Random number to decide what resource
+                    int randomNum = Random.Range(0, 20); //Random number to decide what resource
                     if (randomNum == 0)
                     {
-                        Instantiate(resource2, resourcePosition, Quaternion.identity,ResourceParent.transform); // 1 in 10 chance of instantating rarer resource
+                        Instantiate(resources[2], resourcePosition, Quaternion.identity,ResourceParent.transform); //Gold - Rare (1 in 20)
                     }
-                    else Instantiate(resource1, resourcePosition, Quaternion.identity, ResourceParent.transform); // 9 in 10 chance of instantiating common resource
+                    else if(randomNum < 5)
+                    {
+                        Instantiate(resources[1], resourcePosition, Quaternion.identity, ResourceParent.transform); //Iron - Uncommon (4 in 20)
+                    }
+                    else Instantiate(resources[0], resourcePosition, Quaternion.identity, ResourceParent.transform); // Wood - Common (15 in 20)
                 }
 
                 /*
@@ -256,8 +262,8 @@ public class ItemSpawner : MonoBehaviour
                                                         /*currentHeight * terrainData.size.y,*/ 0,
                                                         randomZ * terrainSizeX) + this.transform.position;
 
-                    if ((Vector3.Distance(obstaclePosition, playerBaseLocation) > baseDistance) && //Distant from Player Base
-                        (Vector3.Distance(obstaclePosition, enemyBaseLocation) > baseDistance)) //Distant from Enemy Base
+                    if ((Vector3.Distance(obstaclePosition, playerBaseLocation) > baseDistance+obstacleExtraBaseSpacing) && //Distant from Player Base
+                        (Vector3.Distance(obstaclePosition, enemyBaseLocation) > baseDistance+ obstacleExtraBaseSpacing)) //Distant from Enemy Base
                     {
                         Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 360), 0); //Random y rotation
 

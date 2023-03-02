@@ -22,6 +22,8 @@ public class ResourceData
     public int numOfTypes = (int)Resource.Type.LastItem;
     public float distanceFromPlayer;
     public float distanceFromBase;
+
+    public float takenAmount;
 }
 
 
@@ -141,13 +143,18 @@ public class EnemyAgent : Agent
             foreach (Collider collider in hits)
             {
                 bool validNav = true;
+
                 //1. Save distance from player to resource
-                navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
-                while (GetPathRemainingDistance() == -1 && collider!=null) //Keep trying until value is valid
+                float distanceFromPlayer;
+
+                if (collider != null) //Don't run if collider turns out to be null. (Rare error)
                 {
-                    yield return null;
+                    navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
+                    while (GetPathRemainingDistance() == -1 && collider!=null) //Keep trying until value is valid
+                    {
+                        yield return null;
+                    }
                 }
-                float distanceFromPlayer; 
 
                 //Debug.Log("GetTrackingList Trace: 4");
 
@@ -182,14 +189,16 @@ public class EnemyAgent : Agent
                         Debug.Log("Invalid nav, using Vector3.distance");
                     }
                     //Debug.Log("GetTrackingList Trace: 5");
-
+                    ResourceObject resourceObjectScript = resourceObject.GetComponent<ResourceObject>();
                     resourcesTrackingList.Add(new ResourceData()
                     {
                         resourceObject = resourceObject,
                         //Save type
-                        type = resourceObject.GetComponent<ResourceObject>().resourceDropped.resourceType,
+                        type = resourceObjectScript.resourceDropped.resourceType,
                         distanceFromPlayer = distanceFromPlayer,
-                        distanceFromBase = distanceFromBase
+                        distanceFromBase = distanceFromBase,
+
+                        takenAmount = resourceObjectScript.totalDeposited / resourceObjectScript.dropAmount
 
                     });
                     resourceCounter++;
@@ -277,6 +286,8 @@ public class EnemyAgent : Agent
         //Penalize based on distances
         AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
         AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
+
+        Debug.Log("Distance Penalty: " + (-(distToPlayer * distancePenalisePriority * defaultRewardWeight)));
         //Debug.Log("GatherResources Error Track 2");
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
@@ -437,6 +448,7 @@ public class EnemyAgent : Agent
                     sensor.AddObservation(resourceData.distanceFromBase);
                     sensor.AddObservation(resourceData.distanceFromPlayer);
                     sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
+                    sensor.AddObservation(resourceData.takenAmount);
                 }
                 //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
             }
