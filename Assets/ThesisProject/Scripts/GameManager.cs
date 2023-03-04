@@ -25,11 +25,13 @@ public class GameManager : MonoBehaviour
     [Header("Agent Model Evaluation")]
     [SerializeField] private NNModel[] evaluationModels;
     [SerializeField] private string modelPath;
-    private int currentModel = 0;
 
-    public ItemSpawner itemSpawner;
+    private int currentModel = 0;
+    private int modelRound = 0;
+    private int[] roundScores;
     StringBuilder sb;
 
+    public ItemSpawner itemSpawner;
 
     [Space(10)]
     [Header("Game End")]
@@ -55,7 +57,9 @@ public class GameManager : MonoBehaviour
     {
         if(levelType == LevelType.AgentEvaluation)
         {
-            sb = new StringBuilder("ModelNumber,ModelName,FinalScore");
+            roundScores = new int[3];
+
+            sb = new StringBuilder("ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,AvgScore");
             evaluationModels = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
         }
     }
@@ -109,6 +113,7 @@ public class GameManager : MonoBehaviour
             timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
         }
 
+        //After Timer End
         if (levelType == LevelType.AgentTraining)
         {
             enemyAgent.EndEpisode();
@@ -116,14 +121,30 @@ public class GameManager : MonoBehaviour
 
         else if (levelType == LevelType.AgentEvaluation)
         {
-            Debug.Log("Writing Evaluation");
+            roundScores[modelRound] = enemyAgent.GetScore(); //Save enemy score of this round
 
-            sb.Append('\n')
-                .Append(currentModel.ToString()).Append(',')
-                .Append(evaluationModels[currentModel].name).Append(',')
-                .Append(enemyAgent.GetScore().ToString()).Append(',');
+            Debug.Log("Agent Evaluation - ModelNum: " + currentModel + " RoundNum: " + (modelRound + 1) + " Score:" + roundScores[modelRound]);
 
-            currentModel++; //set next model to evaluate
+            modelRound++;
+            if (modelRound >= 3) //Play 3 rounds on a single model
+            {
+                double average = roundScores.Average(); //Calculate avg of 3 rounds
+
+                modelRound = 0;
+
+                Debug.Log("Writing Evaluation");
+
+                sb.Append('\n')
+                    .Append(currentModel.ToString()).Append(',')
+                    .Append(evaluationModels[currentModel].name).Append(',')
+                    .Append(roundScores[0]).Append(',')
+                    .Append(roundScores[1]).Append(',')
+                    .Append(roundScores[2]).Append(',')
+                    .Append(average).Append(',');
+
+                currentModel++;
+            }
+            //currentModel++; //set next model to evaluate
 
 
             if (currentModel >= evaluationModels.Length) //If reached end of list save file and exit playmode

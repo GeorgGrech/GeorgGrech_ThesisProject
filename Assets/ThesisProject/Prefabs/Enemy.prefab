@@ -337,8 +337,8 @@ MonoBehaviour:
   initialScanRange: 15
   navmeshSurface: {fileID: 0}
   maxBranchSize: 50
-  distancePenalisePriority: 0.3
-  endTrainingWithMaxEpisodes: 1
+  distancePenalisePriority: 0.15
+  endTrainingWithMaxEpisodes: 0
   MaxEpisodes: 12
   resourceGatherRewardPriority: 0.25
   defaultRewardWeight: 0.03

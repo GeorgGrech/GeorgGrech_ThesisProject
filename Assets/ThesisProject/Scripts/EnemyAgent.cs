@@ -145,7 +145,7 @@ public class EnemyAgent : Agent
                 bool validNav = true;
 
                 //1. Save distance from player to resource
-                float distanceFromPlayer;
+                float distanceFromPlayer = 0;
 
                 if (collider != null) //Don't run if collider turns out to be null. (Rare error)
                 {
@@ -154,6 +154,7 @@ public class EnemyAgent : Agent
                     {
                         yield return null;
                     }
+                    distanceFromPlayer = GetPathRemainingDistance();
                 }
 
                 //Debug.Log("GetTrackingList Trace: 4");
@@ -180,12 +181,12 @@ public class EnemyAgent : Agent
                     float distanceFromBase = 0;
                     if (validNav)
                     {
-                        distanceFromPlayer = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
+                        distanceFromBase = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
                         //Debug.Log("Valid nav, using nav distance");
                     }
                     else
                     {
-                        distanceFromPlayer = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
+                        distanceFromBase = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
                         Debug.Log("Invalid nav, using Vector3.distance");
                     }
                     //Debug.Log("GetTrackingList Trace: 5");
@@ -284,10 +285,7 @@ public class EnemyAgent : Agent
     {
         //Debug.Log("GatherResources Error Track 1");
         //Penalize based on distances
-        AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
-        AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
-
-        Debug.Log("Distance Penalty: " + (-(distToPlayer * distancePenalisePriority * defaultRewardWeight)));
+        
         //Debug.Log("GatherResources Error Track 2");
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
@@ -345,6 +343,15 @@ public class EnemyAgent : Agent
 
             if (enemyPlayer.interactableObject) //If interactableObject is null, for whatever reason, break operation and rescan
             {
+
+                //Since interaction was successful (or at least object was found), it is now fair to penalize on distances
+
+                AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
+                AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
+
+                Debug.Log("Distance Penalty (toPlayer): " + (-(distToPlayer * distancePenalisePriority * defaultRewardWeight)));
+                Debug.Log("Distance Penalty: (toBase) " + (-(distToBase * distancePenalisePriority * defaultRewardWeight)));
+
                 ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
                 while (enemyPlayer.playerInteracting)
                 {
