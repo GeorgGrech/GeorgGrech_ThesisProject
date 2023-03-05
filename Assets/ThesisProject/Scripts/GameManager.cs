@@ -123,7 +123,7 @@ public class GameManager : MonoBehaviour
         {
             roundScores[modelRound] = enemyAgent.GetScore(); //Save enemy score of this round
 
-            Debug.Log("Agent Evaluation - ModelNum: " + currentModel + " RoundNum: " + (modelRound + 1) + " Score:" + roundScores[modelRound]);
+            Debug.Log("Agent Evaluation - ModelNum: " + currentModel + " RoundNum: " + (modelRound + 1) + " Score: " + roundScores[modelRound]);
 
             modelRound++;
             if (modelRound >= 3) //Play 3 rounds on a single model

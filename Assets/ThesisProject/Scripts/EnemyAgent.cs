@@ -23,7 +23,8 @@ public class ResourceData
     public float distanceFromPlayer;
     public float distanceFromBase;
 
-    public float takenAmount;
+    //public float takenAmount;
+    public int invAmountLeft;
 }
 
 
@@ -199,9 +200,10 @@ public class EnemyAgent : Agent
                         distanceFromPlayer = distanceFromPlayer,
                         distanceFromBase = distanceFromBase,
 
-                        takenAmount = resourceObjectScript.totalDeposited / (float)resourceObjectScript.dropAmount
-
+                        //takenAmount = resourceObjectScript.totalDeposited / (float)resourceObjectScript.dropAmount
+                        invAmountLeft = resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited) //Amount of space items left in resource take
                     });
+                    Debug.Log("invAmountLeft in "+resourceObject.name+": "+resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited));
                     resourceCounter++;
                     //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
                     //Debug.Log("GetTrackingList Trace: 6");
@@ -255,7 +257,8 @@ public class EnemyAgent : Agent
         {
             Debug.Log("TrackingListForceStopTimer - Breaking");
             isTracking = false;
-            RequestDecision(); //If enough time has passed and GetTracking hasn't concluded, just jump to decision
+            //RequestDecision(); //If enough time has passed and GetTracking hasn't concluded, just jump to decision
+            StartCoroutine(GetTrackingList()); //Try scan again
         }
 
     }
@@ -455,7 +458,7 @@ public class EnemyAgent : Agent
                     sensor.AddObservation(resourceData.distanceFromBase);
                     sensor.AddObservation(resourceData.distanceFromPlayer);
                     sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
-                    sensor.AddObservation(resourceData.takenAmount);
+                    sensor.AddObservation(resourceData.invAmountLeft);
                 }
                 //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
             }

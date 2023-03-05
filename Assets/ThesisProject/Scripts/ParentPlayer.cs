@@ -56,14 +56,13 @@ public class ParentPlayer : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-
         //Debug.Log("OnTriggerEnter");
         interactableObject = other.gameObject;
      }
 
     protected virtual void OnTriggerExit(Collider other)
     {
-        if(other.gameObject == interactableObject) //Make sure trigger exit doesnt clear the wrong object
+        if (other.gameObject == interactableObject) //Make sure trigger exit doesnt clear the wrong object
             interactableObject = null;
     }
 
