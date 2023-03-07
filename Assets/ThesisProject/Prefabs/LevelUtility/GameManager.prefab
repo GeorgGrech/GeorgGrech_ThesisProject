@@ -48,6 +48,13 @@ MonoBehaviour:
   enemyScoreText: {fileID: 0}
   timerText: {fileID: 0}
   timerTotalSeconds: 300
-  evaluationBrains: []
+  evaluationModels: []
   modelPath: ModelsToEvaluate
+  itemSpawner: {fileID: 0}
+  isGameFinished: 0
+  endGamePanel: {fileID: 0}
+  endGameHeader: {fileID: 0}
+  endGamePlayerScore: {fileID: 0}
+  endGameEnemyScore: {fileID: 0}
+  endGameTextObjects: []
   levelType: 0

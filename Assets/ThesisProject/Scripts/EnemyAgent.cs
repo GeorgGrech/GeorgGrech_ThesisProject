@@ -203,7 +203,7 @@ public class EnemyAgent : Agent
                         //takenAmount = resourceObjectScript.totalDeposited / (float)resourceObjectScript.dropAmount
                         invAmountLeft = resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited) //Amount of space items left in resource take
                     });
-                    Debug.Log("invAmountLeft in "+resourceObject.name+": "+resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited));
+                    //Debug.Log("invAmountLeft in "+resourceObject.name+": "+resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited));
                     resourceCounter++;
                     //Debug.Log("Scanned " + resourceCounter + " / " + resourceAmount);
                     //Debug.Log("GetTrackingList Trace: 6");
@@ -349,8 +349,8 @@ public class EnemyAgent : Agent
 
                 //Since interaction was successful (or at least object was found), it is now fair to penalize on distances
 
-                AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
-                AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
+                //AddReward(-(distToPlayer * distancePenalisePriority * defaultRewardWeight));
+                //AddReward(-(distToBase * distancePenalisePriority * defaultRewardWeight));
 
                 Debug.Log("Distance Penalty (toPlayer): " + (-(distToPlayer * distancePenalisePriority * defaultRewardWeight)));
                 Debug.Log("Distance Penalty: (toBase) " + (-(distToBase * distancePenalisePriority * defaultRewardWeight)));
@@ -455,15 +455,15 @@ public class EnemyAgent : Agent
             {
                 foreach (ResourceData resourceData in resourcesTrackingList)
                 {
-                    sensor.AddObservation(resourceData.distanceFromBase);
-                    sensor.AddObservation(resourceData.distanceFromPlayer);
+                    sensor.AddObservation(resourceData.distanceFromPlayer/20); //Normalize to 20 (limited range)
+                    sensor.AddObservation(resourceData.distanceFromBase/200); //Normalize to 200 (unlimited range)
                     sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
-                    sensor.AddObservation(resourceData.invAmountLeft);
+                    sensor.AddObservation((float)resourceData.invAmountLeft/enemyPlayer.maxInventorySize);
                 }
                 //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
             }
 
-            sensor.AddObservation(enemyPlayer.inventoryAmountFree); //Keep track of inventory
+            sensor.AddObservation((float)enemyPlayer.inventoryAmountFree/ enemyPlayer.maxInventorySize); //Keep track of inventory
         }
         /* Observations to collect
          * -(All resources) Distance from enemy
@@ -612,9 +612,10 @@ public class EnemyPlayer : ParentPlayer
     public override void AddScore(int index)
     {
         base.AddScore(index);
-        enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
+        //enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
+        enemyAgent.AddReward((float)inventory[index].points/20); //Normalize reward based on max points (5 - Gold)
         statsRecorder.Add("Score", enemyAgent.GetScore()); //Display score on TensorBoard
-        Debug.Log("Base deposit reward: " + inventory[index].points * enemyAgent.defaultRewardWeight);
+        Debug.Log("Base deposit reward: " + (float)inventory[index].points / 30);
 
         /*
         if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)
@@ -652,7 +653,7 @@ public class EnemyPlayer : ParentPlayer
         base.AddToInventory(resourceDropped);
 
         //This line of code rewards the agent for simply gathering a resource, though the award is less
-        enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority * enemyAgent.defaultRewardWeight);
+        //enemyAgent.AddReward(resourceDropped.points * enemyAgent.resourceGatherRewardPriority * enemyAgent.defaultRewardWeight);
     }
 
     public IEnumerator GoToDestination(Transform destination)

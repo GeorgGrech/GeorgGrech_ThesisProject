@@ -110,18 +110,18 @@ public class ResourceObject : MonoBehaviour
 
         ParentPlayer playerScript = null;
 
-        bool isEnemy;
+        //bool isEnemy;
 
         if (playerObject.CompareTag("Player"))
         {
             playerScript = playerObject.GetComponent<HumanPlayer>();
-            isEnemy = false;
+            //isEnemy = false;
         }
         //else condition to get enemy script
         else
         {
             playerScript = playerObject.GetComponent<EnemyPlayer>();
-            isEnemy = true;
+            //isEnemy = true;
         }
 
         playerScript.playerInteracting = playerInteracting;
@@ -133,10 +133,10 @@ public class ResourceObject : MonoBehaviour
             progressSlider.value = (float)deposited / dropAmount;
             if (playerScript.IsInventoryFull(resourceDropped.inventorySpaceTaken))
             {
-                if (isEnemy && deposited == 0) //Penalize if inventory already full on first interaction
+                /*if (isEnemy && deposited == 0) //Penalize if inventory already full on first interaction
                 {
                     playerScript.FullInventoryPenalize();
-                }
+                }*/
                 Debug.Log("Inventory full. Cancelling operation.");
                 break;
             }

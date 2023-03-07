@@ -102,9 +102,9 @@ public class GameManager : MonoBehaviour
 
         while (currentSeconds > 0)
         {
-            if (levelType == LevelType.AgentTraining)
+            /*if (levelType == LevelType.AgentTraining)
                 yield return new WaitForSecondsRealtime(1); //If Agent training use unscaled time
-            else
+            else*/
                 yield return new WaitForSeconds(1); //Else use regular scaled time that allows pauses
 
             currentSeconds--;
