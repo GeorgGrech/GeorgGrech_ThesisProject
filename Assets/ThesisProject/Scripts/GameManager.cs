@@ -116,6 +116,7 @@ public class GameManager : MonoBehaviour
         //After Timer End
         if (levelType == LevelType.AgentTraining)
         {
+            enemyAgent.SetTensorScore(); //Update episode-end score on TensorBoard
             enemyAgent.EndEpisode();
         }
 

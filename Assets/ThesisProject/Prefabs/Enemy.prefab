@@ -208,6 +208,7 @@ GameObject:
   - component: {fileID: 4381368502671526406}
   - component: {fileID: 283584594460921457}
   - component: {fileID: 591604281117011565}
+  - component: {fileID: -8523515456499631271}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -270,7 +271,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 0cbd11b48fb0c1a42a4f1b9fa87b3e95, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: e02cdddd36655ac40966553910585eb3, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: ResourceAgent
@@ -294,7 +295,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!195 &283584594460921457
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -337,7 +338,6 @@ MonoBehaviour:
   initialScanRange: 15
   navmeshSurface: {fileID: 0}
   maxBranchSize: 50
-  distancePenalisePriority: 0.15
   endTrainingWithMaxEpisodes: 0
   MaxEpisodes: 12
   resourceGatherRewardPriority: 0.25
@@ -346,3 +346,18 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+--- !u!114 &-8523515456499631271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8011776797989357586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd8012d5925524537b27131fef517017, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: BufferSensor
+  m_ObservableSize: 4
+  m_MaxNumObservables: 18
