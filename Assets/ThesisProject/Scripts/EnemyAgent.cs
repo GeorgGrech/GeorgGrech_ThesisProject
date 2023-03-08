@@ -189,7 +189,7 @@ public class EnemyAgent : Agent
                     if (validNav)
                     {
                         distanceFromBase = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
-                        //Debug.Log("Valid nav, using nav distance");
+                        Debug.Log("Valid nav, using nav distance");
                     }
                     else
                     {
