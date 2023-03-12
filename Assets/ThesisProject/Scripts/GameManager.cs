@@ -17,7 +17,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI enemyScoreText;
 
     [SerializeField] private TextMeshProUGUI timerText;
-    [SerializeField] private int timerTotalSeconds;
+    public int timerTotalSeconds;
+    public int timerSecondsLeft;
 
     //public bool agentTrainingLevel;
     //public bool agentEvaluationLevel;
@@ -90,8 +91,8 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator Timer()
     {
-        int currentSeconds = timerTotalSeconds;
-        var ts = TimeSpan.FromSeconds(currentSeconds);
+        timerSecondsLeft = timerTotalSeconds;
+        var ts = TimeSpan.FromSeconds(timerSecondsLeft);
         timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
 
 
@@ -100,16 +101,16 @@ public class GameManager : MonoBehaviour
             enemyAgent.SetModel("ResourceAgent", evaluationModels[currentModel]);
         }
 
-        while (currentSeconds > 0)
+        while (timerSecondsLeft > 0)
         {
             /*if (levelType == LevelType.AgentTraining)
                 yield return new WaitForSecondsRealtime(1); //If Agent training use unscaled time
             else*/
                 yield return new WaitForSeconds(1); //Else use regular scaled time that allows pauses
 
-            currentSeconds--;
+            timerSecondsLeft--;
 
-            ts = TimeSpan.FromSeconds(currentSeconds);
+            ts = TimeSpan.FromSeconds(timerSecondsLeft);
             timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
         }
 

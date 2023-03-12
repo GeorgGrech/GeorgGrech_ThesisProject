@@ -135,7 +135,7 @@ public class EnemyAgent : Agent
     {
         navmeshSurface.BuildNavMesh(); //Rebuild navmesh
 
-        itemSpawner.ClearNullValues(); //Clear null values from gameManager.ResourceOhjects
+        itemSpawner.ClearNullValues(); //Clear null values from itemSpawner.ResourceObjects
 
         enemyPlayer.PauseMovement(); //Pause movement to not start moving to resources to scan
 
@@ -526,8 +526,9 @@ public class EnemyAgent : Agent
                 sensor.AddObservation(targetInvAmountLeftNormalised);
 
             }
-
             sensor.AddObservation((float)enemyPlayer.inventoryAmountFree / enemyPlayer.maxInventorySize); //Keep track of inventory
+            sensor.AddObservation((float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds); //Keep track of time left
+            Debug.Log("Observing time left: " + (float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds);
         }
 
         catch
