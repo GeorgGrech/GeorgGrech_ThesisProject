@@ -16,9 +16,9 @@ using Unity.Barracuda;
 
 public class ResourceData
 {
-    public GameObject resourceObject;
+    public Transform resourceObject;
     //public string type; //type needs to be set to some type of number for compatibility with ML
-    public Resource.Type type; //Enum type, Wood or Iron
+    public Resource.Type type; //Enum type, Wood, Iron, or Gold
     public int numOfTypes = (int)Resource.Type.LastItem;
     public float distanceFromPlayer;
     public float distanceFromBase;
@@ -30,6 +30,23 @@ public class ResourceData
 
 public class EnemyAgent : Agent
 {
+    //Beginning of Observations and related vars. Similar to old "ResourceData" class
+    private Transform targetTransform;
+    private Resource.Type targetType;
+    private int numOfTypes = (int)Resource.Type.LastItem;
+    private float targetPDistanceNormalised; //Normalized values
+    private float targetBDistanceNormalised;
+    private float targetInvAmountLeftNormalised;
+
+    //Min and max distances for normalisation
+    private float minDistanceFromPlayer;
+    private float maxDistanceFromPlayer;
+    private float minDistanceFromBase;
+    private float maxDistanceFromBase;
+
+    private int resourceObserving = 0;
+    // End of observations
+
     private bool firstTimeStart = true; //Used so that OnEpisodeBegin isn't called on start
 
     private EnemyPlayer enemyPlayer;
@@ -40,7 +57,7 @@ public class EnemyAgent : Agent
     public ItemSpawner itemSpawner;
 
     public List<ResourceData> resourcesTrackingList; //Scanned list including all distances to enemy and base
-    [SerializeField] private int initialScanRange; 
+    [SerializeField] private int initialScanRange;
 
     private NavMeshAgent navmeshAgent;
     public NavMeshSurface navmeshSurface; //Terrain navmesh for rebaking navmesh when necessary
@@ -122,7 +139,7 @@ public class EnemyAgent : Agent
 
         enemyPlayer.PauseMovement(); //Pause movement to not start moving to resources to scan
 
-        while(itemSpawner.ResourceObjects == null || itemSpawner.ResourceObjects.Count == 0) //Wait until resources are loaded
+        while (itemSpawner.ResourceObjects == null || itemSpawner.ResourceObjects.Count == 0) //Wait until resources are loaded
         {
             yield return null;
         }
@@ -133,7 +150,7 @@ public class EnemyAgent : Agent
 
         while (hits.Length == 0 && scanRange < 100) //Safety precaution: Stop scanning if nothing found up to range = 100
         {
-            hits = Physics.OverlapSphere(transform.position, scanRange, 1<<6); //Get resources within range, and only in "Resource" layer
+            hits = Physics.OverlapSphere(transform.position, scanRange, 1 << 6); //Get resources within range, and only in "Resource" layer
             scanRange += 10; //if no objects detected in range, increase range
         }
 
@@ -147,6 +164,12 @@ public class EnemyAgent : Agent
             isTracking = true;
             Coroutine trackTimer = StartCoroutine(TrackingListForceStopTimer(8));
             //Debug.Log("GetTrackingList Trace: 3");
+
+            minDistanceFromPlayer = 0;
+            maxDistanceFromPlayer = 0;
+            minDistanceFromBase = 0;
+            maxDistanceFromBase = 0;
+
             foreach (Collider collider in hits)
             {
                 bool validNav = true;
@@ -157,11 +180,20 @@ public class EnemyAgent : Agent
                 if (collider != null) //Don't run if collider turns out to be null. (Rare error)
                 {
                     navmeshAgent.destination = collider.transform.position; //Assign resource as agent target
-                    while (GetPathRemainingDistance() == -1 && collider!=null) //Keep trying until value is valid
+                    while (GetPathRemainingDistance() == -1 && collider != null) //Keep trying until value is valid
                     {
                         yield return null;
                     }
                     distanceFromPlayer = GetPathRemainingDistance();
+
+                    if (distanceFromPlayer > maxDistanceFromPlayer)
+                    {
+                        maxDistanceFromPlayer = distanceFromPlayer;
+                    }
+                    else if (distanceFromPlayer < minDistanceFromPlayer || minDistanceFromPlayer == 0)
+                    {
+                        minDistanceFromPlayer = distanceFromPlayer;
+                    }
                 }
 
                 //Debug.Log("GetTrackingList Trace: 4");
@@ -170,7 +202,7 @@ public class EnemyAgent : Agent
                 if (collider != null) //Check that collider still exists. Fixes error causewd when changing level for agent
                 {
 
-                    GameObject resourceObject = collider.transform.parent.gameObject;
+                    Transform resourceObject = collider.transform.parent;
                     ResourceObject objectScript = resourceObject.GetComponent<ResourceObject>();
                     objectScript.navmeshAgent.destination = enemyBase.position; //Redundant. Try setting it once in ResourceObject.cs
                     //Debug.Log("GetTrackingList Trace - Resource name:" + collider.name + " Resource position:" + collider.transform.position);
@@ -189,25 +221,32 @@ public class EnemyAgent : Agent
                     if (validNav)
                     {
                         distanceFromBase = objectScript.GetPathRemainingDistance(); //If  valid nav, use nav distance
-                        Debug.Log("Valid nav, using nav distance");
                     }
                     else
                     {
                         distanceFromBase = Vector3.Distance(resourceObject.transform.position, enemyBase.position); //Invalid nav, using basic Vector3 distance
-                        Debug.Log("Invalid nav, using Vector3.distance");
                     }
+
+                    if (distanceFromBase > maxDistanceFromBase)
+                    {
+                        maxDistanceFromBase = distanceFromBase;
+                    }
+                    else if (distanceFromPlayer < minDistanceFromPlayer || minDistanceFromPlayer == 0)
+                    {
+                        minDistanceFromBase = distanceFromBase;
+                    }
+
                     //Debug.Log("GetTrackingList Trace: 5");
-                    ResourceObject resourceObjectScript = resourceObject.GetComponent<ResourceObject>();
                     resourcesTrackingList.Add(new ResourceData()
                     {
                         resourceObject = resourceObject,
                         //Save type
-                        type = resourceObjectScript.resourceDropped.resourceType,
+                        type = objectScript.resourceDropped.resourceType,
                         distanceFromPlayer = distanceFromPlayer,
                         distanceFromBase = distanceFromBase,
 
                         //takenAmount = resourceObjectScript.totalDeposited / (float)resourceObjectScript.dropAmount
-                        invAmountLeft = resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited) //Amount of space items left in resource take
+                        invAmountLeft = objectScript.resourceDropped.inventorySpaceTaken * (objectScript.dropAmount - objectScript.totalDeposited) //Amount of space items left in resource take
                     });
                     //Debug.Log("invAmountLeft in "+resourceObject.name+": "+resourceObjectScript.resourceDropped.inventorySpaceTaken * (resourceObjectScript.dropAmount - resourceObjectScript.totalDeposited));
                     resourceCounter++;
@@ -222,13 +261,16 @@ public class EnemyAgent : Agent
 
 
             }
-            enemyPlayer.ResumeMovement(); //Resume movement again
+            //enemyPlayer.ResumeMovement(); //Resume movement again
             StopCoroutine(trackTimer);
             isTracking = false;
 
 
             Debug.Log("resourcesTrackingList length: " + resourcesTrackingList.Count);
-            RequestDecision(); //After getting list, request decision
+
+            resourceObserving = 0;
+            DecideOnResource(); //Start checking resources
+            //RequestDecision(); //After getting list, request decision
 
             /*
             //Redundant loop just for checking due to inability to see resourcesTrackingList in inspector
@@ -238,12 +280,32 @@ public class EnemyAgent : Agent
                     " DistFromPlayer: " + resourceData.distanceFromPlayer +
                     " DistFromBase: " + resourceData.distanceFromBase);
             }*/
-        }   
+        }
+    }
+
+    private void DecideOnResource()
+    {
+
+        if (resourceObserving >= resourcesTrackingList.Count)
+        {
+            Debug.Log("Reached end of list, looping");
+            resourceObserving = 0;
+        }
+        Debug.Log("Observing next resource ( "+(resourceObserving+1)+" / "+resourcesTrackingList.Count+" )");
+
+        ResourceData resource = resourcesTrackingList[resourceObserving];
+
+        targetTransform = resource.resourceObject; //Observe properties of this resource
+        targetType = resource.type;
+        targetPDistanceNormalised = (resource.distanceFromPlayer - minDistanceFromPlayer) / (maxDistanceFromPlayer - minDistanceFromPlayer);
+        targetBDistanceNormalised = (resource.distanceFromBase - minDistanceFromBase) / (maxDistanceFromBase - minDistanceFromBase);
+        targetInvAmountLeftNormalised = (float)resource.invAmountLeft / enemyPlayer.maxInventorySize;
+
+        RequestDecision(); //Make decision based on info of this resource
     }
 
     private IEnumerator StartValidTimer(float time)
     {
-        Debug.Log("ValidTimer - Started");
         validCounter = 0;
         while (validCounter < time)
         {
@@ -254,7 +316,6 @@ public class EnemyAgent : Agent
 
     private IEnumerator TrackingListForceStopTimer(float time)
     {
-        Debug.Log("TrackingListForceStopTimer - Started");
         int counter = 0;
         while (counter < time)
         {
@@ -297,7 +358,7 @@ public class EnemyAgent : Agent
     {
         //Debug.Log("GatherResources Error Track 1");
         //Penalize based on distances
-        
+
         //Debug.Log("GatherResources Error Track 2");
         // 1. Set target to resourceObject
         StartCoroutine(enemyPlayer.GoToDestination(targetResource));
@@ -312,7 +373,7 @@ public class EnemyAgent : Agent
         {
             if (targetResource != null) //Circumvents rare error where player destroys resource wanted by enemy
             {
-                if((Vector3.Distance(transform.position,targetResource.position) < 2.5)&& validTimer == null) //If in vicinity, start coroutine
+                if ((Vector3.Distance(transform.position, targetResource.position) < 2.5) && validTimer == null) //If in vicinity, start coroutine
                 {
                     validTimer = StartCoroutine(StartValidTimer(2));
                 }
@@ -329,7 +390,7 @@ public class EnemyAgent : Agent
                 break;
             }
         }
-        if(validTimer!=null) StopCoroutine(validTimer);
+        if (validTimer != null) StopCoroutine(validTimer);
 
         if (!validPos)
         {
@@ -342,13 +403,11 @@ public class EnemyAgent : Agent
         {
             // 3. Interact with item
             //Included in GoToDestination
-            //yield return new WaitForSecondsRealtime(.1f); //Buffer to ensure that interact has been activated
 
             // 4. Wait until completion or interruption
-            Debug.Log("GatherResources Error Track 4");
             validTimer = null;
             //yield return new WaitForSecondsRealtime(.2f);
-            if(validTimer == null)
+            if (validTimer == null)
             {
                 validTimer = StartCoroutine(StartValidTimer(2));
             }
@@ -368,7 +427,7 @@ public class EnemyAgent : Agent
                 while (enemyPlayer.playerInteracting)
                 {
                     yield return null;
-                    if(resourceObject != null)
+                    if (resourceObject != null)
                     {
                         if (validCounter == 2 && !resourceObject.playerInteracting)
                         {
@@ -385,7 +444,6 @@ public class EnemyAgent : Agent
             }
             //if (validTimer != null) StopCoroutine(validTimer);
             Debug.Log("Action completed. Interaction successful or interrupted.");
-            Debug.Log("GatherResources Error Track 5");
 
             StartCoroutine(GetTrackingList()); //Rescan list to allow next decision
         }
@@ -422,11 +480,11 @@ public class EnemyAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        Debug.Log("Training currently on episode: "+(CompletedEpisodes+1)+" / "+MaxEpisodes);
+        Debug.Log("Training currently on episode: " + (CompletedEpisodes + 1) + " / " + MaxEpisodes);
         if (!firstTimeStart) //Double check so that this function doesn't run on start
         {
             ResetLevelAndAgent();
-            
+
             StopAllCoroutines(); //Stop any actions
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
@@ -442,7 +500,7 @@ public class EnemyAgent : Agent
 
     public void ResetLevelAndAgent()
     {
-        itemSpawner.ResetLevel(this.gameObject,false);
+        itemSpawner.ResetLevel(this.gameObject, false);
         enemyPlayer.ResetInventory();
         //enemyPlayer.ResumeMovement();
         enemyPlayer.score = 0;
@@ -450,7 +508,7 @@ public class EnemyAgent : Agent
 
     public void Penalty(float penalty)
     {
-        AddReward(-penalty*defaultRewardWeight);
+        AddReward(-penalty * defaultRewardWeight);
         Debug.Log("Penalty weight: " + -penalty * defaultRewardWeight);
     }
 
@@ -460,49 +518,17 @@ public class EnemyAgent : Agent
     {
         try
         {
-            if (resourcesTrackingList != null && resourcesTrackingList.Count > 0)
+            if (targetTransform != null)
             {
-                foreach (ResourceData resourceData in resourcesTrackingList)
-                {
-                    /*
-                    sensor.AddObservation(resourceData.distanceFromPlayer/50); //Normalize to 50 (limited range)
-                    sensor.AddObservation(resourceData.distanceFromBase/200); //Normalize to 200 (unlimited range)
-                    sensor.AddOneHotObservation((int)resourceData.type, resourceData.numOfTypes);
-                    sensor.AddObservation((float)resourceData.invAmountLeft/enemyPlayer.maxInventorySize);
+                sensor.AddObservation(targetPDistanceNormalised);
+                sensor.AddObservation(targetBDistanceNormalised);
+                sensor.AddOneHotObservation((int)targetType, numOfTypes);
+                sensor.AddObservation(targetInvAmountLeftNormalised);
 
-                    Debug.Log("distancem1: " + resourceData.distanceFromPlayer / 50);
-                    Debug.Log("distancem2: " + resourceData.distanceFromBase / 200);
-                    */
-
-                    float[] listObservation = new float[6]; // 2 distance values, imvAmount + extra 3 for one-hot encoding of type
-
-                    listObservation[(int)resourceData.type] = 1;
-
-                    listObservation[3] = resourceData.distanceFromPlayer / 50; //Normalize to 50 (limited range)
-                    listObservation[4] = resourceData.distanceFromBase / 150; //Normalize to 150 (greater range)
-                    listObservation[5] = (float)resourceData.invAmountLeft / enemyPlayer.maxInventorySize;
-
-                    m_BufferSensor.AppendObservation(listObservation);
-
-                    Debug.Log("DistanceBaseRatio: "+ resourceData.distanceFromBase / 150);
-
-                }
-                //sensor.AddObservation(this.transform.localPosition); //No need to observe current position since distances are already measured
             }
 
-            sensor.AddObservation((float)enemyPlayer.inventoryAmountFree/ enemyPlayer.maxInventorySize); //Keep track of inventory
+            sensor.AddObservation((float)enemyPlayer.inventoryAmountFree / enemyPlayer.maxInventorySize); //Keep track of inventory
         }
-        /* Observations to collect
-         * -(All resources) Distance from enemy
-         * -(All resources) Distance from base
-         * -(ALl resources) Type of resource
-         */
-
-        /*
-        sensor.AddObservation(targetResource.localPosition); // Position of target resource
-        sensor.AddObservation(enemyBase.transform.localPosition); // Position of enemy base
-        sensor.AddObservation(this.transform.localPosition); // Position of enemy
-        */
 
         catch
         {
@@ -512,39 +538,37 @@ public class EnemyAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        Debug.Log("Cumulative Reward: "+GetCumulativeReward());
+        Debug.Log("Cumulative Reward: " + GetCumulativeReward());
 
         int actionIndex = actionBuffers.DiscreteActions[0];
 
         Debug.Log("Action Index: " + actionIndex);
 
-        if (actionIndex == 0) //0 means returns to base 
+        if (actionIndex == 0 || actionIndex == 1)
         {
-            Debug.Log("Return to base");
-            StartCoroutine(ReturnToBase());
-        }
+            enemyPlayer.ResumeMovement(); //Resume movement again
 
-
-        else //1 or greater, choose to gather a resource
-        {
-            Debug.Log("Going to gather resource " + (actionIndex - 1) + ": " + resourcesTrackingList[actionIndex - 1].type); 
-            StartCoroutine(GatherResource(resourcesTrackingList[actionIndex - 1].resourceObject.transform));
-        }
-    }
-
-    public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
-    {
-        //int used = 0;
-        for (int i = 0; i < maxBranchSize; i++)
-        {
-            if(i >= resourcesTrackingList.Count+1) //Disable out of range unused branches
+            if (actionIndex == 0) //0 means returns to base 
             {
-                actionMask.SetActionEnabled(0, i, false);
+                Debug.Log("Return to base");
+                StartCoroutine(ReturnToBase());
             }
-            //else used = i;
+
+            else if (actionIndex == 1)
+            {
+                Debug.Log("Gathering resource");
+                StartCoroutine(GatherResource(targetTransform));
+            }
         }
-        //Debug.Log("Branches used: " + (used + 1 )+" Total actions:" + (resourcesTrackingList.Count + 1));
+
+        else //else if Action Index == 2, keep checking
+        {
+            resourceObserving++;
+            Debug.Log("Moving to next resource");
+            DecideOnResource();
+        }
     }
+
 
     #endregion
 
@@ -567,7 +591,7 @@ public class EnemyAgent : Agent
     void GatherRandomResource()
     {
         Transform target = itemSpawner.ResourceObjects[Random.Range(0, itemSpawner.ResourceObjects.Count)].transform;
-        Debug.Log("Test target: " + target.name+" at position: "+target.position);
+        Debug.Log("Test target: " + target.name + " at position: " + target.position);
         StartCoroutine(GatherResource(target));
     }
 
@@ -581,7 +605,7 @@ public class EnemyAgent : Agent
     void SwitchRandomBrain()
     {
         NNModel brain = brains[Random.Range(0, brains.Length)];
-        SetModel("ResourceAgent",brain);
+        SetModel("ResourceAgent", brain);
         Debug.Log("Switched brain to: " + brain.name);
     }
 
@@ -641,7 +665,7 @@ public class EnemyPlayer : ParentPlayer
     {
         base.AddScore(index);
         //enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
-        enemyAgent.AddReward((float)inventory[index].points/20); //Normalize reward based on max points (5 - Gold)
+        enemyAgent.AddReward((float)inventory[index].points / 20); //Normalize reward based on max points (5 - Gold)
         Debug.Log("Base deposit reward: " + (float)inventory[index].points / 30);
 
         /*
@@ -655,7 +679,7 @@ public class EnemyPlayer : ParentPlayer
     public override void PauseMovement()
     {
         base.PauseMovement();
-        if(navmeshAgent) navmeshAgent.speed = movementSpeed;
+        if (navmeshAgent) navmeshAgent.speed = movementSpeed;
     }
 
     public override void ResumeMovement()
@@ -671,7 +695,7 @@ public class EnemyPlayer : ParentPlayer
 
     public override void FullInventoryPenalize()
     {
-        enemyAgent.Penalty(maxInventorySize-inventoryAmountFree);
+        enemyAgent.Penalty(maxInventorySize - inventoryAmountFree);
     }
 
     public override void AddToInventory(Resource resourceDropped)
