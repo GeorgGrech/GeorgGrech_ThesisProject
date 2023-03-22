@@ -528,7 +528,6 @@ public class EnemyAgent : Agent
             }
             sensor.AddObservation((float)enemyPlayer.inventoryAmountFree / enemyPlayer.maxInventorySize); //Keep track of inventory
             sensor.AddObservation((float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds); //Keep track of time left
-            Debug.Log("Observing time left: " + (float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds);
         }
 
         catch

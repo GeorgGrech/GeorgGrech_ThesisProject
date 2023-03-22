@@ -58,9 +58,9 @@ public class GameManager : MonoBehaviour
     {
         if(levelType == LevelType.AgentEvaluation)
         {
-            roundScores = new int[3];
+            roundScores = new int[4];
 
-            sb = new StringBuilder("ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,AvgScore");
+            sb = new StringBuilder("ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,AvgScore");
             evaluationModels = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
         }
     }
@@ -128,9 +128,9 @@ public class GameManager : MonoBehaviour
             Debug.Log("Agent Evaluation - ModelNum: " + currentModel + " RoundNum: " + (modelRound + 1) + " Score: " + roundScores[modelRound]);
 
             modelRound++;
-            if (modelRound >= 3) //Play 3 rounds on a single model
+            if (modelRound >= 4) //Play 4 rounds on a single model
             {
-                double average = roundScores.Average(); //Calculate avg of 3 rounds
+                double average = roundScores.Average(); //Calculate avg of 4 rounds
 
                 modelRound = 0;
 
@@ -142,6 +142,7 @@ public class GameManager : MonoBehaviour
                     .Append(roundScores[0]).Append(',')
                     .Append(roundScores[1]).Append(',')
                     .Append(roundScores[2]).Append(',')
+                    .Append(roundScores[3]).Append(',')
                     .Append(average).Append(',');
 
                 currentModel++;

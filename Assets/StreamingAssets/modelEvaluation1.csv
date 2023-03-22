@@ -1,7 +1,4 @@
-ModelNumber,ModelName,FinalScore
-0,ResourceAgent-1,265,
-1,ResourceAgent-2,265,
-2,ResourceAgent-3,320,
-3,ResourceAgent-4,270,
-4,ResourceAgent-5,310,
-5,ResourceAgent-6,335,
+ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,AvgScore
+0,1-ResourceAgent-1499,410,415,345,390,
+1,2-ResourceAgent-11990,470,435,530,478.333333333333,
+2,3-ResourceAgent-76466,530,445,510,495,
