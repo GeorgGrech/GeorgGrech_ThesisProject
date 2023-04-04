@@ -8,6 +8,7 @@ using TMPro;
 using Unity.Barracuda;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class GameManager : MonoBehaviour
     //public bool agentEvaluationLevel;
     [Space(10)]
     [Header("Agent Model Evaluation")]
-    [SerializeField] private NNModel[] evaluationModels;
+    [SerializeField] private NNModel[] models;
     [SerializeField] private string modelPath;
 
     private int currentModel = 0;
@@ -33,6 +34,8 @@ public class GameManager : MonoBehaviour
     StringBuilder sb;
 
     public ItemSpawner itemSpawner;
+
+    private DifficultySetting difficultySetting;
 
     [Space(10)]
     [Header("Game End")]
@@ -43,6 +46,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI endGameEnemyScore;
 
     public GameObject[] endGameTextObjects;
+
 
     public enum LevelType
     {
@@ -56,13 +60,25 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(levelType == LevelType.AgentEvaluation)
+        if(levelType == LevelType.AgentEvaluation || levelType == LevelType.PlayerLevel)
+        {
+            models = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
+        }
+
+        if (levelType == LevelType.AgentEvaluation)
         {
             roundScores = new int[4];
 
             sb = new StringBuilder("ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,AvgScore");
-            evaluationModels = Resources.LoadAll(modelPath, typeof(NNModel)).Cast<NNModel>().ToArray();
         }
+
+        else if(levelType == LevelType.PlayerLevel)
+        {
+            //difficultySetting = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>();
+            difficultySetting = DifficultySetting._instance;
+        }
+
+        StartCoroutine(Timer());
     }
 
     // Update is called once per frame
@@ -91,6 +107,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator Timer()
     {
+
         timerSecondsLeft = timerTotalSeconds;
         var ts = TimeSpan.FromSeconds(timerSecondsLeft);
         timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
@@ -98,7 +115,15 @@ public class GameManager : MonoBehaviour
 
         if (levelType == LevelType.AgentEvaluation) //If is evaluation level, set agent brain to correct one to evaluate
         {
-            enemyAgent.SetModel("ResourceAgent", evaluationModels[currentModel]);
+            enemyAgent.SetModel("ResourceAgent", models[currentModel]);
+        }
+
+        else if(levelType == LevelType.PlayerLevel)
+        {
+            if(difficultySetting.difficultySetting < 3) //3 refers to Auto difficulty
+            {
+                enemyAgent.SetModel("ResourceAgent", models[difficultySetting.difficultySetting]);
+            }
         }
 
         while (timerSecondsLeft > 0)
@@ -138,7 +163,7 @@ public class GameManager : MonoBehaviour
 
                 sb.Append('\n')
                     .Append(currentModel.ToString()).Append(',')
-                    .Append(evaluationModels[currentModel].name).Append(',')
+                    .Append(models[currentModel].name).Append(',')
                     .Append(roundScores[0]).Append(',')
                     .Append(roundScores[1]).Append(',')
                     .Append(roundScores[2]).Append(',')
@@ -150,7 +175,7 @@ public class GameManager : MonoBehaviour
             //currentModel++; //set next model to evaluate
 
 
-            if (currentModel >= evaluationModels.Length) //If reached end of list save file and exit playmode
+            if (currentModel >= models.Length) //If reached end of list save file and exit playmode
             {
                 SaveToFile(sb.ToString());
 
@@ -193,6 +218,12 @@ public class GameManager : MonoBehaviour
             textObject.SetActive(true);
         }
 
+    }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quitting to Main Menu");
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void SaveToFile(string toSave)

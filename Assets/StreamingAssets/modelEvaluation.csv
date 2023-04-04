@@ -1,4 +1,4 @@
 ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,AvgScore
-0,1-ResourceAgent-1499,340,165,385,330,305,
-1,2-ResourceAgent-11990,425,400,435,465,431.25,
-2,3-ResourceAgent-76466,475,470,505,390,460,
+0,0-ResourceAgent-1492,340,460,365,340,376.25
+1,1-ResourceAgent-13468,410,425,450,370,413.75
+2,2-ResourceAgent-489955,415,450,420,490,443.75

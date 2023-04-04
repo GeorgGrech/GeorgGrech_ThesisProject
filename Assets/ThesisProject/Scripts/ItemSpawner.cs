@@ -69,7 +69,7 @@ public class ItemSpawner : MonoBehaviour
         SpawnObstacles();
         SpawnEnemy(); //Spawn Enemy near Enemy Base
 
-        StartCoroutine(gameManager.Timer());
+        //StartCoroutine(gameManager.Timer());
     }
 
     // Update is called once per frame

@@ -48,8 +48,9 @@ MonoBehaviour:
   enemyScoreText: {fileID: 0}
   timerText: {fileID: 0}
   timerTotalSeconds: 300
-  evaluationModels: []
-  modelPath: ModelsToEvaluate
+  timerSecondsLeft: 0
+  models: []
+  modelPath: TrainedModels
   itemSpawner: {fileID: 0}
   isGameFinished: 0
   endGamePanel: {fileID: 0}

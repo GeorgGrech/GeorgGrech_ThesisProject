@@ -74,7 +74,7 @@ public class EnemyAgent : Agent
     public float defaultRewardWeight = .1f; //All rewards to be multiplied by this value to remain mostly in optimal [-1,1] range
 
     //Brains
-    [SerializeField] private NNModel[] brains;
+    //[SerializeField] private NNModel[] brains;
 
     //private List<GameObject> resourceObjects;
 
@@ -231,7 +231,7 @@ public class EnemyAgent : Agent
                     {
                         maxDistanceFromBase = distanceFromBase;
                     }
-                    else if (distanceFromPlayer < minDistanceFromPlayer || minDistanceFromPlayer == 0)
+                    else if (distanceFromBase < minDistanceFromBase || minDistanceFromBase == 0)
                     {
                         minDistanceFromBase = distanceFromBase;
                     }
@@ -422,6 +422,9 @@ public class EnemyAgent : Agent
 
                 //Debug.Log("Distance Penalty (toPlayer): " + (-(distToPlayer * distancePenalisePriority * defaultRewardWeight)));
                 //Debug.Log("Distance Penalty: (toBase) " + (-(distToBase * distancePenalisePriority * defaultRewardWeight)));
+                //Debug.Log("val2: " + targetBDistanceNormalised);
+
+
 
                 ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
                 while (enemyPlayer.playerInteracting)
@@ -525,6 +528,8 @@ public class EnemyAgent : Agent
                 sensor.AddOneHotObservation((int)targetType, numOfTypes);
                 sensor.AddObservation(targetInvAmountLeftNormalised);
 
+                //Debug.Log("val1: "+targetBDistanceNormalised);
+
             }
             sensor.AddObservation((float)enemyPlayer.inventoryAmountFree / enemyPlayer.maxInventorySize); //Keep track of inventory
             sensor.AddObservation((float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds); //Keep track of time left
@@ -601,13 +606,13 @@ public class EnemyAgent : Agent
         StartCoroutine(ReturnToBase());
     }
 
-    [ContextMenu("Switch to a random brain")]
+    /*[ContextMenu("Switch to a random brain")]
     void SwitchRandomBrain()
     {
         NNModel brain = brains[Random.Range(0, brains.Length)];
         SetModel("ResourceAgent", brain);
         Debug.Log("Switched brain to: " + brain.name);
-    }
+    }*/
 
     public void SetTensorScore()
     {
