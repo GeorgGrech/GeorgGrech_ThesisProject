@@ -52,9 +52,9 @@ MonoBehaviour:
   enemyPrefab: {fileID: 8011776797989357586, guid: 23a48e8a63e21b54982abab5df7994f0,
     type: 3}
   resources:
-  - {fileID: 8084662504680635843, guid: 5c3e1ea44b4d89c4ab9ad43aeed5b63c, type: 3}
-  - {fileID: 1490637206039979100, guid: 8995ee5586a95fd45b77a11b6a0dc0c5, type: 3}
-  - {fileID: 6657597271948954878, guid: 689b953e6496d9f438481e03dd49fe19, type: 3}
+  - {fileID: 8084662504680635843, guid: 5ab0bde3ab9543a45aedabb56d1a2fc0, type: 3}
+  - {fileID: 1490637206039979100, guid: 4115d260c8e885c40b2def3623a9e578, type: 3}
+  - {fileID: 6657597271948954878, guid: f93ab237402a9c546a5ddbf5f8a07e61, type: 3}
   resourceSpacing: 7
   resourceSpawnShift: 1.6
   baseDistance: 11

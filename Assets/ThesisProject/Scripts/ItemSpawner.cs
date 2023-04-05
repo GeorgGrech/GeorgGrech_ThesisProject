@@ -127,16 +127,23 @@ public class ItemSpawner : MonoBehaviour
                 if((Vector3.Distance(resourcePosition,playerBaseLocation)>baseDistance)&& //Distant from Player Base
                     (Vector3.Distance(resourcePosition, enemyBaseLocation) > baseDistance)) //Distant from Enemy Base
                 {
+                    GameObject resource;
+
                     int randomNum = Random.Range(0, 20); //Random number to decide what resource
                     if (randomNum == 0)
                     {
-                        Instantiate(resources[2], resourcePosition, Quaternion.identity,ResourceParent.transform); //Gold - Rare (1 in 20)
+                        resource = Instantiate(resources[2], resourcePosition, Quaternion.identity,ResourceParent.transform); //Gold - Rare (1 in 20)
                     }
                     else if(randomNum < 5)
                     {
-                        Instantiate(resources[1], resourcePosition, Quaternion.identity, ResourceParent.transform); //Iron - Uncommon (4 in 20)
+                        resource = Instantiate(resources[1], resourcePosition, Quaternion.identity, ResourceParent.transform); //Iron - Uncommon (4 in 20)
                     }
-                    else Instantiate(resources[0], resourcePosition, Quaternion.identity, ResourceParent.transform); // Wood - Common (15 in 20)
+                    else resource = Instantiate(resources[0], resourcePosition, Quaternion.identity, ResourceParent.transform); // Wood - Common (15 in 20)
+
+                    Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 360), 0); //Random y rotation
+
+                    Transform mesh = resource.transform.Find("ResourceMesh"); //Only rotate mesh to not interfere with UI
+                    mesh.localRotation = spawnRotation;
                 }
 
                 /*
