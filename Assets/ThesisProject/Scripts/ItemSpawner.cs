@@ -132,13 +132,17 @@ public class ItemSpawner : MonoBehaviour
                     int randomNum = Random.Range(0, 20); //Random number to decide what resource
                     if (randomNum == 0)
                     {
-                        resource = Instantiate(resources[2], resourcePosition, Quaternion.identity,ResourceParent.transform); //Gold - Rare (1 in 20)
+                        resource = Instantiate(resources[4], resourcePosition, Quaternion.identity,ResourceParent.transform); //Gold - Rare (1 in 20)
                     }
                     else if(randomNum < 5)
                     {
-                        resource = Instantiate(resources[1], resourcePosition, Quaternion.identity, ResourceParent.transform); //Iron - Uncommon (4 in 20)
+                        resource = Instantiate(resources[3], resourcePosition, Quaternion.identity, ResourceParent.transform); //Iron - Uncommon (4 in 20)
                     }
-                    else resource = Instantiate(resources[0], resourcePosition, Quaternion.identity, ResourceParent.transform); // Wood - Common (15 in 20)
+                    else
+                    {
+                        int treetype = Random.Range(0, 3); //Spawn random one of 3 tree models
+                        resource = Instantiate(resources[treetype], resourcePosition, Quaternion.identity, ResourceParent.transform); // Wood - Common (15 in 20)
+                    } 
 
                     Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 360), 0); //Random y rotation
 

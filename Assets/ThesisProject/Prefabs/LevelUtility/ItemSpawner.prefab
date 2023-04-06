@@ -53,6 +53,8 @@ MonoBehaviour:
     type: 3}
   resources:
   - {fileID: 8084662504680635843, guid: 5ab0bde3ab9543a45aedabb56d1a2fc0, type: 3}
+  - {fileID: 8084662504680635843, guid: a6c458422a286104eb849a7e48567058, type: 3}
+  - {fileID: 8084662504680635843, guid: 1b4c6def00bae3c4ea4e549d80cbeaad, type: 3}
   - {fileID: 1490637206039979100, guid: 4115d260c8e885c40b2def3623a9e578, type: 3}
   - {fileID: 6657597271948954878, guid: f93ab237402a9c546a5ddbf5f8a07e61, type: 3}
   resourceSpacing: 7
