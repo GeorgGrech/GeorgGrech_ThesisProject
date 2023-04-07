@@ -44,7 +44,7 @@ public class BasePointerUI : MonoBehaviour
 
         if (screenPos.x >= 0 && screenPos.x <= 1 && screenPos.y >= 0 && screenPos.y <= 1)
         {
-            Debug.Log("already on screen, don't bother with the rest!");
+            //Debug.Log("already on screen, don't bother with the rest!");
             //gameObject.SetActive(false);
             Show(false);
         }

@@ -28,9 +28,9 @@ public class MenuManager : MonoBehaviour
         difficultySection.SetActive(true);
     }
 
-    public void SetDifficultyAndPlay(int setting)
+    public void SetDifficultyAndPlay(int difficulty)
     {
-        difficultySetting.difficultySetting = setting;
+        difficultySetting.chosenDifficulty = (DifficultySetting.difficultySetting) difficulty; 
         SceneManager.LoadScene("PlayerLevel");
     }
 }

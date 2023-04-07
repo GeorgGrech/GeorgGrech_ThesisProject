@@ -22,5 +22,16 @@ public class DifficultySetting : MonoBehaviour
         //myData = GetComponent<SaveLoadData>();
     }
 
-    public int difficultySetting = 0;
+    //public int difficultySetting = 0;
+
+    public enum difficultySetting
+    {
+        Easy,
+        Medium,
+        Hard,
+        Auto
+    }
+
+    public difficultySetting chosenDifficulty = difficultySetting.Easy; //Easy by default
+
 }

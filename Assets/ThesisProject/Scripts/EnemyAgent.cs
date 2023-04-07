@@ -426,7 +426,7 @@ public class EnemyAgent : Agent
 
 
 
-                ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to chech if interaction successful
+                ResourceObject resourceObject = enemyPlayer.interactableObject.GetComponent<ResourceObject>(); //Get ResourcObject to check if interaction successful
                 while (enemyPlayer.playerInteracting)
                 {
                     yield return null;

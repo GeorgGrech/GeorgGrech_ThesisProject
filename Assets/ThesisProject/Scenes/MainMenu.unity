@@ -1519,7 +1519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0dd83f3b5e38df4dba5295aa1418b7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficultySetting: 0
+  chosenDifficulty: 0
 --- !u!4 &1260864718
 Transform:
   m_ObjectHideFlags: 0

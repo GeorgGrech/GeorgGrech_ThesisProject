@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
         {
             //difficultySetting = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>();
             difficultySetting = DifficultySetting._instance;
+            sb = new StringBuilder();
         }
 
         StartCoroutine(Timer());
@@ -120,9 +121,9 @@ public class GameManager : MonoBehaviour
 
         else if(levelType == LevelType.PlayerLevel)
         {
-            if(difficultySetting.difficultySetting < 3) //3 refers to Auto difficulty
+            if((int)difficultySetting.chosenDifficulty < 3) //3 refers to Auto difficulty
             {
-                enemyAgent.SetModel("ResourceAgent", models[difficultySetting.difficultySetting]);
+                enemyAgent.SetModel("ResourceAgent", models[(int)difficultySetting.chosenDifficulty]);
             }
         }
 
@@ -177,7 +178,7 @@ public class GameManager : MonoBehaviour
 
             if (currentModel >= models.Length) //If reached end of list save file and exit playmode
             {
-                SaveToFile(sb.ToString());
+                SaveToFile(sb.ToString(),true);
 
                 EditorApplication.ExitPlaymode();
             }
@@ -190,8 +191,12 @@ public class GameManager : MonoBehaviour
 
         else //Player Level
         {
+            sb.Append(playerScoreText.text).Append(',')
+                .Append(enemyScoreText.text);
             isGameFinished = true;
             StartCoroutine(FinishGame());
+
+            SaveToFile(sb.ToString(), false);
         }
     }
 
@@ -226,7 +231,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void SaveToFile(string toSave)
+    public void SaveToFile(string toSave, bool evaluation)
     {
 #if UNITY_EDITOR
         var folder = Application.streamingAssetsPath;
@@ -237,11 +242,30 @@ public class GameManager : MonoBehaviour
     var folder = Application.persistentDataPath;
 #endif
 
-        var filePath = Path.Combine(folder, "modelEvaluation.csv");
+        string filePath;
+        if(evaluation) filePath = Path.Combine(folder, "modelEvaluation.csv");
+        else filePath = Path.Combine(folder, difficultySetting.chosenDifficulty+".csv");
 
-        using (var writer = new StreamWriter(filePath, false))
+        if (evaluation) //if agent evaluation, just write file
         {
-            writer.Write(toSave);
+            using (var writer = new StreamWriter(filePath, false))
+            {
+                writer.Write(toSave);
+            }
+        }
+        else //if player level, check if file exists and create or append
+        {
+            if (!File.Exists(filePath)) //Create header if creating new file
+            {
+                string header = "Participant Number, Player Score, Enemy Score";
+                File.WriteAllText(filePath, header);
+            }
+            var lines = File.ReadAllLines(filePath);
+            var count = lines.Length; //count lines to get participant number
+
+            string playerEntry = Environment.NewLine + count.ToString()+","+toSave; //Save participant number + scores received
+
+            File.AppendAllText(filePath, playerEntry); //Append results
         }
 
         // Or just

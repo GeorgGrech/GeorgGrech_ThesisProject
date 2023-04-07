@@ -42,6 +42,7 @@ public class ResourceObject : MonoBehaviour
     public Resource resourceDropped;
 
     public bool playerInteracting; //To check if already being interacted with to avoid duplicate interaction or enemy and player interacting with same resource
+    private GameObject playerUsing;
 
     //private GameManager gameManager;
     private ItemSpawner itemSpawner;
@@ -125,6 +126,7 @@ public class ResourceObject : MonoBehaviour
         }
 
         playerScript.playerInteracting = playerInteracting;
+        playerUsing = playerObject;
 
         int deposited; //Keep track of amount deposited to subtract from dropAmount in case of operation cancel
         //Add line for enemyPlayerScript
@@ -174,7 +176,17 @@ public class ResourceObject : MonoBehaviour
     {
         Debug.Log("Resource interaction");
         if (!playerInteracting)
+        {
             StartCoroutine(GiveResources(playerObject));
+        }
+        else
+        {
+            if (playerObject.CompareTag("Enemy") && playerUsing!=playerObject) //Fix agent getting stuck when interacting with resoruce player is gathering
+            {
+                Debug.Log("Agent attempting invalid gather. Resetting.");
+                StartCoroutine(playerObject.GetComponent<EnemyAgent>().GetTrackingList()); //Reset agent 
+            }
+        }
     }
 
     //nav methods methods to be used by Agent determining distance between resource and base
