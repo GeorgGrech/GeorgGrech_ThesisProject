@@ -71,7 +71,7 @@ public class EnemyAgent : Agent
     public int MaxEpisodes = 0;
     public float resourceGatherRewardPriority = 0.5f;
 
-    public float defaultRewardWeight = .1f; //All rewards to be multiplied by this value to remain mostly in optimal [-1,1] range
+    //public float defaultRewardWeight = .1f; //All rewards to be multiplied by this value to remain mostly in optimal [-1,1] range
 
     //Brains
     //[SerializeField] private NNModel[] brains;
@@ -491,14 +491,16 @@ public class EnemyAgent : Agent
             StopAllCoroutines(); //Stop any actions
             StartCoroutine(DelayedStart()); //Start actions again with delay
         }
-
+#if UNITY_EDITOR
         if (endTrainingWithMaxEpisodes)
         {
             if (MaxEpisodes != 0 && CompletedEpisodes >= MaxEpisodes) //For every x amount of completed episodes, quit. User will then manually interrupt and save NN file before restarting for next session.
             {
+
                 EditorApplication.ExitPlaymode();
             }
         }
+#endif
     }
 
     public void ResetLevelAndAgent()
@@ -511,10 +513,19 @@ public class EnemyAgent : Agent
 
     public void Penalty(float penalty)
     {
-        AddReward(-penalty * defaultRewardWeight);
-        Debug.Log("Penalty weight: " + -penalty * defaultRewardWeight);
+        AddReward(-penalty);
+        Debug.Log("Penalty weight: " + -penalty);
     }
 
+    public IEnumerator WalkingPenalty() //PEnalize when walking to encourage agent to minimize distances
+    {
+        Debug.Log("Starting movement Penalty.");
+        while (true)
+        {
+            Penalty(.05f);
+            yield return new WaitForSeconds(1);
+        }
+    }
 
     #region Agent methods
     public override void CollectObservations(VectorSensor sensor)
@@ -646,6 +657,8 @@ public class EnemyPlayer : ParentPlayer
 
     StatsRecorder statsRecorder;
 
+    Coroutine walkingPenalty;
+
     protected override void Start()
     {
         base.Start();
@@ -684,18 +697,32 @@ public class EnemyPlayer : ParentPlayer
     public override void PauseMovement()
     {
         base.PauseMovement();
-        if (navmeshAgent) navmeshAgent.speed = movementSpeed;
+        if (navmeshAgent)
+        {
+            navmeshAgent.speed = movementSpeed;
+            if (walkingPenalty != null)
+            {
+                Debug.Log("Stopping movement penalty");
+                StopCoroutine(walkingPenalty);
+                walkingPenalty = null;
+            }
+        }
+
     }
 
     public override void ResumeMovement()
     {
         base.ResumeMovement();
-        if (navmeshAgent) navmeshAgent.speed = movementSpeed;
+        if (navmeshAgent)
+        {
+            navmeshAgent.speed = movementSpeed;
+            if(walkingPenalty == null) walkingPenalty = StartCoroutine(enemyAgent.WalkingPenalty());
+        }
     }
 
     public override void InventoryRemainderPenalize()
     {
-        enemyAgent.Penalty(inventoryAmountFree);
+        enemyAgent.Penalty((float)inventoryAmountFree/maxInventorySize);
     }
 
     public override void FullInventoryPenalize()

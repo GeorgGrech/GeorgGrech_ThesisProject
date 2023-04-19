@@ -37,6 +37,8 @@ public class GameManager : MonoBehaviour
 
     private DifficultySetting difficultySetting;
 
+    public DataLogger dataLogger;
+
     [Space(10)]
     [Header("Game End")]
     public bool isGameFinished;
@@ -77,7 +79,10 @@ public class GameManager : MonoBehaviour
             //difficultySetting = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>();
             difficultySetting = DifficultySetting._instance;
             sb = new StringBuilder();
+
+            dataLogger = GameObject.Find("DataLogger").GetComponent<DataLogger>();
         }
+
 
         StartCoroutine(Timer());
     }
@@ -116,6 +121,12 @@ public class GameManager : MonoBehaviour
 
         if (levelType == LevelType.AgentEvaluation) //If is evaluation level, set agent brain to correct one to evaluate
         {
+
+            while (!itemSpawner) //Fixes error in Agent Evaluation where Item Spawner hasn't finished so enemyAgent = null
+            {
+                Debug.Log("Waiting for Item spawner init");
+                yield return null;
+            }
             enemyAgent.SetModel("ResourceAgent", models[currentModel]);
         }
 
@@ -179,8 +190,9 @@ public class GameManager : MonoBehaviour
             if (currentModel >= models.Length) //If reached end of list save file and exit playmode
             {
                 SaveToFile(sb.ToString(),true);
-
+#if UNITY_EDITOR
                 EditorApplication.ExitPlaymode();
+#endif
             }
             else
             {
@@ -197,6 +209,8 @@ public class GameManager : MonoBehaviour
             StartCoroutine(FinishGame());
 
             SaveToFile(sb.ToString(), false);
+
+            dataLogger.SaveLogs(playerScoreText.text,enemyScoreText.text);
         }
     }
 
