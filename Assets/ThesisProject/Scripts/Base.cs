@@ -15,6 +15,7 @@ public class Base : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         canvasObject = transform.Find("Canvas").gameObject;
         canvasObject.GetComponent<Canvas>().worldCamera = Camera.main;
 
@@ -47,13 +48,16 @@ public class Base : MonoBehaviour
         playerInteracting = true;
         ParentPlayer playerScript = null;
 
+        bool isPlayer;
         if (playerObject.CompareTag("Player"))
         {
+            isPlayer = true;
             playerScript = playerObject.GetComponent<HumanPlayer>();
         }
         //else condition to get enemy script
         else
         {
+            isPlayer = false;
             playerScript = playerObject.GetComponent<EnemyPlayer>();
             
             //playerScript.InventoryRemainderPenalize();
@@ -66,6 +70,11 @@ public class Base : MonoBehaviour
        // bool interrupted = false;
         for (int i = 0; i < playerScript.inventory.Count; i++)
         {
+            if (i == 0) //Only do when actually depositing but only once
+            {
+                playerScript.gameManager.LogBaseInteraction(isPlayer);
+            }
+
             yield return new WaitForSeconds(depositTime);
             try
             {
@@ -82,6 +91,7 @@ public class Base : MonoBehaviour
         playerInteracting = false;
         playerScript.playerInteracting = playerInteracting;
     }
+
 
     void InteractAction(GameObject playerObject)
     {

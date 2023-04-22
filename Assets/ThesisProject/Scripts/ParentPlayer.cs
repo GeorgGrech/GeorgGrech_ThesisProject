@@ -23,6 +23,7 @@ public class ParentPlayer : MonoBehaviour
 
     public GameManager gameManager;
 
+    Coroutine walkingCoroutine;
     // Start is called before the first frame update
     protected virtual void Start()
     {
@@ -109,11 +110,17 @@ public class ParentPlayer : MonoBehaviour
     public virtual void PauseMovement()
     {
         movementSpeed = 0;
+        if (walkingCoroutine != null)
+        {
+            StopCoroutine(walkingCoroutine);
+            walkingCoroutine = null;
+        }
     }
 
     public virtual void ResumeMovement()
     {
         movementSpeed = defaultMovementSpeed;
+        if(walkingCoroutine == null) walkingCoroutine = StartCoroutine(WalkingLog());
     }
 
     public virtual void InventoryRemainderPenalize()
@@ -124,5 +131,17 @@ public class ParentPlayer : MonoBehaviour
     public virtual void FullInventoryPenalize()
     {
         //Leave empty. To be set in EnemyPlayer, and links to EnemyAgent.
+    }
+
+
+    private IEnumerator WalkingLog()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            if (gameObject.CompareTag("Player"))
+                gameManager.LogMovement(true);
+            else gameManager.LogMovement(false);
+        }
     }
 }

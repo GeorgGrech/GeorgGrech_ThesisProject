@@ -15,12 +15,14 @@ public class DataLogger : MonoBehaviour
     int p_ironInteraction;
     int p_goldInteraction;
     int p_baseInteraction;
+    int p_travelTime;
 
     //Enemy vars
     int e_woodInteraction;
     int e_ironInteraction;
     int e_goldInteraction;
     int e_baseInteraction;
+    int e_travelTime;
 
     StringBuilder summary;
     StringBuilder playerLog;
@@ -31,15 +33,16 @@ public class DataLogger : MonoBehaviour
     {
         gameGUID = Guid.NewGuid().ToString();
 
-        string difficulty = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>().chosenDifficulty.ToString();
+        summary = new StringBuilder(",Player,Enemy");
 
-        summary = new StringBuilder(",Difficulty,"+difficulty+" \n " +
-            ",Player,Enemy");
 
+        playerLog = new StringBuilder();
+        enemyLog = new StringBuilder();
     }
 
     public void LogResourceInteraction(bool isPlayer, Resource.Type resource)
     {
+        Debug.Log("Logging resource interaction");
         switch (resource)
         {
             case Resource.Type.Wood:
@@ -58,15 +61,24 @@ public class DataLogger : MonoBehaviour
                 break;
         }
 
-        TimeLog(GetName(isPlayer) + " mining " + resource + " resource.",isPlayer);
+        TimeLog(GetName(isPlayer) + " mining " + resource + " resource",isPlayer);
     }
 
     public void LogBaseDeposit(bool isPlayer)
     {
+        Debug.Log("Logging base deposit");
         if (isPlayer) p_baseInteraction++;
         else e_baseInteraction++;
 
         TimeLog(GetName(isPlayer) + " depositing at base",isPlayer);
+    }
+
+    public void LogMovement(bool isPlayer)
+    {
+        if (isPlayer)
+            p_travelTime++;
+        else
+            e_travelTime++;
     }
 
     private void TimeLog(string message, bool isPlayer)
@@ -102,12 +114,16 @@ public class DataLogger : MonoBehaviour
             writer.Write(enemyLog);
         }
 
+        string difficulty = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>().chosenDifficulty.ToString();
+
         summary.Append('\n') //Write all values to summary file
             .Append("Wood resource interactions,").Append(p_woodInteraction + ",").Append(e_woodInteraction + ",").Append('\n')
             .Append("Iron resource interactions,").Append(p_ironInteraction + ",").Append(e_ironInteraction + ",").Append('\n')
             .Append("Gold resource interactions,").Append(p_goldInteraction + ",").Append(e_goldInteraction + ",").Append('\n')
             .Append("Base deposit interactions,").Append(p_baseInteraction + ",").Append(e_baseInteraction + ",").Append('\n')
-            .Append("Final score,").Append(playerScore+",").Append(enemyScore);
+            .Append("Time Spent Travelling (seconds),").Append(p_travelTime + ",").Append(e_travelTime+ ",").Append('\n')
+            .Append("Final score,").Append(playerScore + ",").Append(enemyScore).Append('\n').Append('\n') //Skip 2 lines
+            .Append("Difficulty,").Append(difficulty);
 
         using (var writer = new StreamWriter(path+"/gameSummary.csv", false)) //Save summary
         {

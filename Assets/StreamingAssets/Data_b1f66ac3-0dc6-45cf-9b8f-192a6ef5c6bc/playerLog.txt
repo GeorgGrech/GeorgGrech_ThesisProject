@@ -1,0 +1,11 @@
+4/22/2023 4:14:52 PM - Player mining Iron resource
+4/22/2023 4:15:02 PM - Player mining Wood resource
+4/22/2023 4:15:11 PM - Player depositing at base
+4/22/2023 4:15:25 PM - Player mining Wood resource
+4/22/2023 4:15:33 PM - Player depositing at base
+4/22/2023 4:15:48 PM - Player mining Iron resource
+4/22/2023 4:16:00 PM - Player depositing at base
+4/22/2023 4:16:53 PM - Player mining Wood resource
+4/22/2023 4:17:06 PM - Player depositing at base
+4/22/2023 4:17:18 PM - Player mining Wood resource
+4/22/2023 4:17:32 PM - Player depositing at base

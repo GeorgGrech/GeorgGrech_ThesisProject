@@ -111,18 +111,18 @@ public class ResourceObject : MonoBehaviour
 
         ParentPlayer playerScript = null;
 
-        //bool isEnemy;
+        bool isPlayer;
 
         if (playerObject.CompareTag("Player"))
         {
             playerScript = playerObject.GetComponent<HumanPlayer>();
-            //isEnemy = false;
+            isPlayer = true;
         }
         //else condition to get enemy script
         else
         {
             playerScript = playerObject.GetComponent<EnemyPlayer>();
-            //isEnemy = true;
+            isPlayer = false;
         }
 
         playerScript.playerInteracting = playerInteracting;
@@ -143,6 +143,11 @@ public class ResourceObject : MonoBehaviour
                 break;
             }
             playerScript.PauseMovement(); //Pause player movement for duration of resource gathering
+
+            if (deposited == totalDeposited) //Only do when actually gathering but only once
+            {
+                playerScript.gameManager.LogResourceInteraction(isPlayer, resourceDropped.resourceType);
+            }
 
             yield return new WaitForSeconds(dropTime);
 

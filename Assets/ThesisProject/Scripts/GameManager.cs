@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
 
     private int currentModel = 0;
     private int modelRound = 0;
+    public int maxEvalRounds = 10;
     private int[] roundScores;
     StringBuilder sb;
 
@@ -69,9 +70,15 @@ public class GameManager : MonoBehaviour
 
         if (levelType == LevelType.AgentEvaluation)
         {
-            roundScores = new int[4];
+            roundScores = new int[maxEvalRounds];
 
-            sb = new StringBuilder("ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,AvgScore");
+            sb = new StringBuilder("ModelNumber,ModelName,");
+
+            for (int i = 0; i < maxEvalRounds; i++)
+            {
+                sb.Append("Round" + (i + 1) + "Score,");
+            }
+            sb.Append("AvgScore");
         }
 
         else if(levelType == LevelType.PlayerLevel)
@@ -165,9 +172,9 @@ public class GameManager : MonoBehaviour
             Debug.Log("Agent Evaluation - ModelNum: " + currentModel + " RoundNum: " + (modelRound + 1) + " Score: " + roundScores[modelRound]);
 
             modelRound++;
-            if (modelRound >= 4) //Play 4 rounds on a single model
+            if (modelRound >= maxEvalRounds) //Play x amount of rounds on a single model
             {
-                double average = roundScores.Average(); //Calculate avg of 4 rounds
+                double average = roundScores.Average(); //Calculate avg of all rounds
 
                 modelRound = 0;
 
@@ -175,12 +182,14 @@ public class GameManager : MonoBehaviour
 
                 sb.Append('\n')
                     .Append(currentModel.ToString()).Append(',')
-                    .Append(models[currentModel].name).Append(',')
-                    .Append(roundScores[0]).Append(',')
-                    .Append(roundScores[1]).Append(',')
-                    .Append(roundScores[2]).Append(',')
-                    .Append(roundScores[3]).Append(',')
-                    .Append(average).Append(',');
+                    .Append(models[currentModel].name).Append(',');
+
+                for (int i = 0; i < maxEvalRounds; i++)
+                {
+                    sb.Append(roundScores[i]).Append(',');
+                }
+
+                sb.Append(average).Append(',');
 
                 currentModel++;
             }
@@ -213,6 +222,34 @@ public class GameManager : MonoBehaviour
             dataLogger.SaveLogs(playerScoreText.text,enemyScoreText.text);
         }
     }
+
+    #region Log methods
+    // These methods link to ones in DataLogger.cs. They are accessed from here since levelType needs to be checked
+    public void LogResourceInteraction(bool isPlayer, Resource.Type resource)
+    {
+        if (levelType == LevelType.PlayerLevel)
+        {
+            dataLogger.LogResourceInteraction(isPlayer, resource);
+        }
+    }
+
+    public void LogBaseInteraction(bool isPlayer)
+    {
+        if (levelType == LevelType.PlayerLevel)
+        {
+            dataLogger.LogBaseDeposit(isPlayer);
+        }
+    }
+
+    public void LogMovement(bool isPlayer)
+    {
+        if (levelType == LevelType.PlayerLevel)
+        {
+            dataLogger.LogMovement(isPlayer);
+        }
+    }
+    #endregion
+
 
     private IEnumerator FinishGame()
     {
