@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     private DifficultySetting difficultySetting;
 
-    public DataLogger dataLogger;
+    private DataLogger dataLogger;
 
     [Space(10)]
     [Header("Game End")]

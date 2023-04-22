@@ -120,7 +120,14 @@ public class ParentPlayer : MonoBehaviour
     public virtual void ResumeMovement()
     {
         movementSpeed = defaultMovementSpeed;
-        if(walkingCoroutine == null) walkingCoroutine = StartCoroutine(WalkingLog());
+        try
+        {
+            if(walkingCoroutine == null) walkingCoroutine = StartCoroutine(WalkingLog());
+        }
+        catch //Catches MissingReference in agent evaluation when switching round
+        {
+            Debug.Log("Movement timer Exception caught");
+        }
     }
 
     public virtual void InventoryRemainderPenalize()
