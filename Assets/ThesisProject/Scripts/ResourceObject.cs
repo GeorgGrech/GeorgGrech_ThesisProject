@@ -56,6 +56,10 @@ public class ResourceObject : MonoBehaviour
     //private Transform enemyBase;
     //private int validCounter;
 
+    public GameObject inventoryFullWarning;
+
+    private GameObject eCanvas;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -66,6 +70,7 @@ public class ResourceObject : MonoBehaviour
 
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
         itemSpawner.ResourceObjects.Add(gameObject);
+        eCanvas = transform.Find("E-Canvas").gameObject;
 
         //enemyBase = GameObject.FindGameObjectWithTag("EnemyBase").GetComponent<Transform>();
 
@@ -82,21 +87,24 @@ public class ResourceObject : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Player entered within range of " + gameObject.name);
-            //playerObject = other.gameObject;
-            //Obtain player script
-
+            try { eCanvas.SetActive(true); } catch { }; //Catch trigger before initialization
         }
-
         if (other.CompareTag("Obstacle"))
         {
             itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>(); //Set here due to obstacle destruction occuring before itemSpawner is found
-            Debug.Log("Collision with Obstacle. Destroying...");
             Destroy(gameObject);
         }
     }
 
-    //Dropping the player resources in thier inventory
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            eCanvas.SetActive(false);
+        }
+    }
+
+    //Dropping the player resources in their inventory
     public IEnumerator GiveResources(GameObject playerObject)
     {
         Transform resourceCanvas = transform.Find("ResourceCanvas");
@@ -104,7 +112,8 @@ public class ResourceObject : MonoBehaviour
         resourceCanvas.GetComponent<Canvas>().worldCamera = Camera.main; //Setting event camera just for safety
 
         Slider progressSlider = resourceCanvas.GetComponentInChildren<Slider>();
-        
+
+        eCanvas.SetActive(false);
 
         Debug.Log("Error track - Start of GiveResources");
         playerInteracting = true;
@@ -117,6 +126,7 @@ public class ResourceObject : MonoBehaviour
         {
             playerScript = playerObject.GetComponent<HumanPlayer>();
             isPlayer = true;
+            eCanvas.SetActive(false);
         }
         //else condition to get enemy script
         else
@@ -170,6 +180,15 @@ public class ResourceObject : MonoBehaviour
         {
             //dropAmount -= deposited;
             Debug.Log("Depositing interrupted. "+(dropAmount-totalDeposited)+" items left.");
+
+            try
+            {
+                StartCoroutine(DisplayInventoryFullWarn(resourceCanvas));
+            }
+            catch
+            {
+                Debug.Log("Exception caught");
+            }
         }
 
         playerInteracting = false;
@@ -256,5 +275,12 @@ public class ResourceObject : MonoBehaviour
     private void EnableNavAgent(bool enable)
     {
         navmeshAgent.enabled = enable;
+    }
+
+    private IEnumerator DisplayInventoryFullWarn(Transform resourceCanvas)
+    {
+        GameObject textObject = Instantiate(inventoryFullWarning, resourceCanvas);
+        yield return new WaitForSeconds(1.5f);
+        Destroy(textObject);
     }
 }

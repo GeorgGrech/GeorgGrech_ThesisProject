@@ -131,7 +131,6 @@ public class GameManager : MonoBehaviour
 
             while (!itemSpawner) //Fixes error in Agent Evaluation where Item Spawner hasn't finished so enemyAgent = null
             {
-                Debug.Log("Waiting for Item spawner init");
                 yield return null;
             }
             enemyAgent.SetModel("ResourceAgent", models[currentModel]);
@@ -156,6 +155,11 @@ public class GameManager : MonoBehaviour
 
             ts = TimeSpan.FromSeconds(timerSecondsLeft);
             timerText.text = string.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
+
+            if(levelType == LevelType.PlayerLevel) //if player level, log info
+            {
+                dataLogger.LogPerformance(timerTotalSeconds-timerSecondsLeft); //Log performance
+            }
         }
 
         //After Timer End

@@ -12,6 +12,8 @@ public class Base : MonoBehaviour
     private GameObject canvasObject;
     [SerializeField] private GameObject depositText;
 
+    private GameObject eCanvas;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,9 +21,10 @@ public class Base : MonoBehaviour
         canvasObject = transform.Find("Canvas").gameObject;
         canvasObject.GetComponent<Canvas>().worldCamera = Camera.main;
 
-        if (tag.Equals("PlayerBase"))
+        if (CompareTag("PlayerBase"))
         {
             GameObject.Find("PointerUI").GetComponent<BasePointerUI>().basePosition = transform.position;
+            eCanvas = transform.Find("E-Canvas").gameObject;
         }
     }
 
@@ -43,6 +46,22 @@ public class Base : MonoBehaviour
         //else statement for enemy
     }*/
 
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player") && CompareTag("PlayerBase"))
+        {
+            eCanvas.SetActive(true);
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player") && CompareTag("PlayerBase"))
+        {
+            eCanvas.SetActive(false);
+        }
+    }
+
     private IEnumerator ResourceDepositing(GameObject playerObject)
     {
         playerInteracting = true;
@@ -53,6 +72,7 @@ public class Base : MonoBehaviour
         {
             isPlayer = true;
             playerScript = playerObject.GetComponent<HumanPlayer>();
+            eCanvas.SetActive(false);
         }
         //else condition to get enemy script
         else

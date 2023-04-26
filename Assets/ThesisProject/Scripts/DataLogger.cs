@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Unity.Profiling;
+using UnityEngine.Profiling;
 
 public class DataLogger : MonoBehaviour
 {
@@ -24,17 +26,27 @@ public class DataLogger : MonoBehaviour
     int e_baseInteraction;
     int e_travelTime;
 
-    StringBuilder summary;
+    //Program/Computer Performance
+    Recorder frameTimeRecorder;
+    ProfilerRecorder memoryUsageRecorder;
+
+    //Resulting strings
+    StringBuilder gameSummary;
     StringBuilder playerLog;
     StringBuilder enemyLog;
+    StringBuilder performanceSummary;
 
     // Start is called before the first frame update
     void Start()
     {
         gameGUID = Guid.NewGuid().ToString();
 
-        summary = new StringBuilder(",Player,Enemy");
+        frameTimeRecorder = Recorder.Get("BehaviourUpdate"); frameTimeRecorder.enabled = true;
+        memoryUsageRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
 
+        gameSummary = new StringBuilder(",Player,Enemy");
+
+        performanceSummary = new StringBuilder("Time (seconds), Frame Time (ns), Memory Usage %");
 
         playerLog = new StringBuilder();
         enemyLog = new StringBuilder();
@@ -97,8 +109,28 @@ public class DataLogger : MonoBehaviour
         else return "Enemy";
     }
 
+    public void LogPerformance(int time)
+    {
+        performanceSummary.Append("\n")
+            .Append(time + ",").Append(GetFrameTime() + ",").Append(GetMemoryUsage());
+
+        Debug.Log("Frame count: "+Time.frameCount+" Total Frame Time: " + GetFrameTime() + " Memory Usage :" + GetMemoryUsage());
+    }
+
+    private string GetFrameTime()
+    {
+        return frameTimeRecorder.elapsedNanoseconds.ToString();
+    }
+
+    private string GetMemoryUsage()
+    {
+        return (memoryUsageRecorder.LastValue / (1024 * 1024)).ToString();
+    }
+
     public void SaveLogs(string playerScore, string enemyScore)
     {
+        Debug.Log("Saving logs with id: " + gameGUID);
+
         var path = Application.streamingAssetsPath+"/"+"Data_"+gameGUID; //Rework for build
 
         if (!Directory.Exists(path))
@@ -116,18 +148,24 @@ public class DataLogger : MonoBehaviour
 
         string difficulty = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>().chosenDifficulty.ToString();
 
-        summary.Append('\n') //Write all values to summary file
-            .Append("Wood resource interactions,").Append(p_woodInteraction + ",").Append(e_woodInteraction + ",").Append('\n')
-            .Append("Iron resource interactions,").Append(p_ironInteraction + ",").Append(e_ironInteraction + ",").Append('\n')
-            .Append("Gold resource interactions,").Append(p_goldInteraction + ",").Append(e_goldInteraction + ",").Append('\n')
-            .Append("Base deposit interactions,").Append(p_baseInteraction + ",").Append(e_baseInteraction + ",").Append('\n')
-            .Append("Time Spent Travelling (seconds),").Append(p_travelTime + ",").Append(e_travelTime+ ",").Append('\n')
+        gameSummary.Append('\n') //Write all values to summary file
+            .Append("Wood resource interactions,").Append(p_woodInteraction + ",").Append(e_woodInteraction).Append('\n')
+            .Append("Iron resource interactions,").Append(p_ironInteraction + ",").Append(e_ironInteraction).Append('\n')
+            .Append("Gold resource interactions,").Append(p_goldInteraction + ",").Append(e_goldInteraction).Append('\n')
+            .Append("Base deposit interactions,").Append(p_baseInteraction + ",").Append(e_baseInteraction).Append('\n')
+            .Append("Time Spent Travelling (seconds),").Append(p_travelTime + ",").Append(e_travelTime).Append('\n')
             .Append("Final score,").Append(playerScore + ",").Append(enemyScore).Append('\n').Append('\n') //Skip 2 lines
             .Append("Difficulty,").Append(difficulty);
 
-        using (var writer = new StreamWriter(path+"/gameSummary.csv", false)) //Save summary
+        using (var writer = new StreamWriter(path+"/gameSummary.csv", false)) //Save game summary
         {
-            writer.Write(summary);
+            writer.Write(gameSummary);
+        }
+
+
+        using (var writer = new StreamWriter(path + "/performanceSummary.csv", false)) //Save performance summary
+        {
+            writer.Write(performanceSummary);
         }
 
 #if UNITY_EDITOR
