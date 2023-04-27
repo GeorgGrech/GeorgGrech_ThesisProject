@@ -10,7 +10,7 @@ using UnityEngine.Profiling;
 
 public class DataLogger : MonoBehaviour
 {
-    private string gameGUID;
+    public string gameGUID;
 
     //Player vars
     int p_woodInteraction;
@@ -131,7 +131,13 @@ public class DataLogger : MonoBehaviour
     {
         Debug.Log("Saving logs with id: " + gameGUID);
 
-        var path = Application.streamingAssetsPath+"/"+"Data_"+gameGUID; //Rework for build
+        string path;
+
+#if UNITY_EDITOR
+        path = Application.streamingAssetsPath+"/"+"Data_"+gameGUID; //Rework for build
+#else
+        path = "E:\ThesisResults"+"/"+"Data_"+gameGUID;
+#endif
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);

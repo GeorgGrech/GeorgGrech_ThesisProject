@@ -297,7 +297,7 @@ public class GameManager : MonoBehaviour
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 #else
-    var folder = Application.persistentDataPath;
+    var folder = "E:\ThesisResults";
 #endif
 
         string filePath;
@@ -315,13 +315,13 @@ public class GameManager : MonoBehaviour
         {
             if (!File.Exists(filePath)) //Create header if creating new file
             {
-                string header = "Participant Number, Player Score, Enemy Score";
+                string header = "Game ID, Player Score, Enemy Score";
                 File.WriteAllText(filePath, header);
             }
             var lines = File.ReadAllLines(filePath);
-            var count = lines.Length; //count lines to get participant number
+            //var count = lines.Length; //count lines to get participant number
 
-            string playerEntry = Environment.NewLine + count.ToString()+","+toSave; //Save participant number + scores received
+            string playerEntry = Environment.NewLine + dataLogger.gameGUID+","+toSave; //Save game Id + scores received
 
             File.AppendAllText(filePath, playerEntry); //Append results
         }
