@@ -9,9 +9,9 @@ EditorBuildSettings:
     path: Assets/ThesisProject/Scenes/MainMenu.unity
     guid: d3c51da20821ad84fb5a1c2fe112c392
   - enabled: 1
-    path: Assets/ThesisProject/Scenes/PlayerLevel.unity
-    guid: 614ff2be5dac2f548903e8a10386c9cc
-  - enabled: 1
     path: Assets/ThesisProject/Scenes/Tutorial.unity
     guid: 8ac8eefb0084c5e499a54f30ac955316
+  - enabled: 1
+    path: Assets/ThesisProject/Scenes/PlayerLevel.unity
+    guid: 614ff2be5dac2f548903e8a10386c9cc
   m_configObjects: {}

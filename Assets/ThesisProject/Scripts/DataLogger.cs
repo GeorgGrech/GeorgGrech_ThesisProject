@@ -7,6 +7,10 @@ using UnityEditor;
 using UnityEngine;
 using Unity.Profiling;
 using UnityEngine.Profiling;
+using System.Threading;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
+using System.Linq;
 
 public class DataLogger : MonoBehaviour
 {
@@ -27,8 +31,12 @@ public class DataLogger : MonoBehaviour
     int e_travelTime;
 
     //Program/Computer Performance
-    Recorder frameTimeRecorder;
-    ProfilerRecorder memoryUsageRecorder;
+    ProfilerRecorder memoryUsageRecorder; //Memory Usage in MB
+    public float CpuUsage; //Percentage
+
+    private Thread _cpuThread;
+    private float _lasCpuUsage;
+    public int processorCount;
 
     //Resulting strings
     StringBuilder gameSummary;
@@ -41,15 +49,27 @@ public class DataLogger : MonoBehaviour
     {
         gameGUID = Guid.NewGuid().ToString();
 
-        frameTimeRecorder = Recorder.Get("BehaviourUpdate"); frameTimeRecorder.enabled = true;
-        memoryUsageRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
+        memoryUsageRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
 
         gameSummary = new StringBuilder(",Player,Enemy");
 
-        performanceSummary = new StringBuilder("Time (seconds), Frame Time (ns), Memory Usage %");
+        performanceSummary = new StringBuilder("Time (seconds), Cpu Usage (%), Memory Usage (MB)");
 
         playerLog = new StringBuilder();
         enemyLog = new StringBuilder();
+
+        Application.runInBackground = true;
+        processorCount = SystemInfo.processorCount;
+        _cpuThread = new Thread(UpdateCPUUsage)
+        {
+            IsBackground = true,
+            // we don't want that our measurement thread
+            // steals performance
+            Priority = System.Threading.ThreadPriority.BelowNormal
+        };
+
+        // start the cpu usage thread
+        _cpuThread.Start();
     }
 
     public void LogResourceInteraction(bool isPlayer, Resource.Type resource)
@@ -112,19 +132,52 @@ public class DataLogger : MonoBehaviour
     public void LogPerformance(int time)
     {
         performanceSummary.Append("\n")
-            .Append(time + ",").Append(GetFrameTime() + ",").Append(GetMemoryUsage());
+            .Append(time + ",").Append(GetCPUUsage() + ",").Append(GetMemoryUsage());
 
-        Debug.Log("Frame count: "+Time.frameCount+" Total Frame Time: " + GetFrameTime() + " Memory Usage :" + GetMemoryUsage());
+        Debug.Log("CPU Usage: " + GetCPUUsage() + " Memory Usage :" + GetMemoryUsage());
     }
 
-    private string GetFrameTime()
+    private string GetCPUUsage()
     {
-        return frameTimeRecorder.elapsedNanoseconds.ToString();
+        return Math.Round(CpuUsage,2).ToString();
     }
 
     private string GetMemoryUsage()
     {
         return (memoryUsageRecorder.LastValue / (1024 * 1024)).ToString();
+    }
+
+    private void UpdateCPUUsage()
+    {
+        var lastCpuTime = new TimeSpan(0);
+
+        // This is ok since this is executed in a background thread
+        while (true)
+        {
+            var cpuTime = new TimeSpan(0);
+
+            // Get a list of all running processes in this PC
+            var AllProcesses = Process.GetProcesses();
+
+            // Sum up the total processor time of all running processes
+            cpuTime = AllProcesses.Aggregate(cpuTime, (current, process) => current + process.TotalProcessorTime);
+
+            // get the difference between the total sum of processor times
+            // and the last time we called this
+            var newCPUTime = cpuTime - lastCpuTime;
+
+            // update the value of _lastCpuTime
+            lastCpuTime = cpuTime;
+
+            // The value we look for is the difference, so the processor time all processes together used
+            // since the last time we called this divided by the time we waited
+            // Then since the performance was optionally spread equally over all physical CPUs
+            // we also divide by the physical CPU count
+            CpuUsage = 100f * (float)newCPUTime.TotalSeconds / 1 / processorCount;
+
+            // Wait for UpdateInterval
+            Thread.Sleep(Mathf.RoundToInt(1 * 1000));
+        }
     }
 
     public void SaveLogs(string playerScore, string enemyScore)
@@ -136,7 +189,7 @@ public class DataLogger : MonoBehaviour
 #if UNITY_EDITOR
         path = Application.streamingAssetsPath+"/"+"Data_"+gameGUID; //Rework for build
 #else
-        path = "E:\ThesisResults"+"/"+"Data_"+gameGUID;
+        path = "E:/ThesisResults"+"/"+"Data_"+gameGUID;
 #endif
 
         if (!Directory.Exists(path))

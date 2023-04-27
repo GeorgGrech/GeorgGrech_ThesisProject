@@ -297,7 +297,7 @@ public class GameManager : MonoBehaviour
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 #else
-    var folder = "E:\ThesisResults";
+    var folder = "E:/ThesisResults";
 #endif
 
         string filePath;
