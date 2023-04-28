@@ -293,12 +293,11 @@ public class GameManager : MonoBehaviour
     {
 #if UNITY_EDITOR
         var folder = Application.streamingAssetsPath;
-
+#else
+    var folder = difficultySetting.resultsPath;
+#endif
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
-#else
-    var folder = "E:/ThesisResults";
-#endif
 
         string filePath;
         if(evaluation) filePath = Path.Combine(folder, "modelEvaluation.csv");

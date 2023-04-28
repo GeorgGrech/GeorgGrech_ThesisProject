@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,6 +12,17 @@ public class MenuManager : MonoBehaviour
 
     [SerializeField] private GameObject difficultySection;
     [SerializeField] private Button PlayButton;
+    [SerializeField] private TMP_InputField filePathInput;
+
+    private void Start()
+    {
+        difficultySetting = DifficultySetting._instance;
+        if(difficultySetting.resultsPath.Length > 1)
+        {
+            Debug.Log("Results path: " + difficultySetting.resultsPath);
+            filePathInput.text = difficultySetting.resultsPath;
+        }
+    }
 
     public void OpenDifficulties()
     {
@@ -20,8 +32,9 @@ public class MenuManager : MonoBehaviour
 
     public void SetDifficultyAndPlay(int difficulty)
     {
-        difficultySetting = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>();
-        difficultySetting.chosenDifficulty = (DifficultySetting.difficultySetting) difficulty; 
+        difficultySetting = DifficultySetting._instance;
+        difficultySetting.chosenDifficulty = (DifficultySetting.difficultySetting) difficulty;
+        difficultySetting.resultsPath = filePathInput.text;
         SceneManager.LoadScene("PlayerLevel");
     }
 

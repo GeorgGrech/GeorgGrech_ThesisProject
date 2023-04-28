@@ -34,4 +34,7 @@ public class DifficultySetting : MonoBehaviour
 
     public difficultySetting chosenDifficulty = difficultySetting.Easy; //Easy by default
 
+
+    public string resultsPath; //Path of results. DifficultySetting used due to DontDestroyOnLoad
+
 }

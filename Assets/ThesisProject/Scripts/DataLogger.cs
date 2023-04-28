@@ -44,9 +44,13 @@ public class DataLogger : MonoBehaviour
     StringBuilder enemyLog;
     StringBuilder performanceSummary;
 
+    private DifficultySetting difficultySetting;
+
     // Start is called before the first frame update
     void Start()
     {
+        difficultySetting = DifficultySetting._instance;
+
         gameGUID = Guid.NewGuid().ToString();
 
         memoryUsageRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
@@ -189,7 +193,7 @@ public class DataLogger : MonoBehaviour
 #if UNITY_EDITOR
         path = Application.streamingAssetsPath+"/"+"Data_"+gameGUID; //Rework for build
 #else
-        path = "E:/ThesisResults"+"/"+"Data_"+gameGUID;
+        path = difficultySetting.resultsPath+"/"+"Data_"+gameGUID;
 #endif
 
         if (!Directory.Exists(path))
@@ -205,7 +209,7 @@ public class DataLogger : MonoBehaviour
             writer.Write(enemyLog);
         }
 
-        string difficulty = GameObject.Find("DifficultySetting").GetComponent<DifficultySetting>().chosenDifficulty.ToString();
+        string difficulty = difficultySetting.chosenDifficulty.ToString();
 
         gameSummary.Append('\n') //Write all values to summary file
             .Append("Wood resource interactions,").Append(p_woodInteraction + ",").Append(e_woodInteraction).Append('\n')
