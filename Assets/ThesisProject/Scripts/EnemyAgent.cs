@@ -539,8 +539,6 @@ public class EnemyAgent : Agent
                 sensor.AddOneHotObservation((int)targetType, numOfTypes);
                 sensor.AddObservation(targetInvAmountLeftNormalised);
 
-                //Debug.Log("val1: "+targetBDistanceNormalised);
-
             }
             sensor.AddObservation((float)enemyPlayer.inventoryAmountFree / enemyPlayer.maxInventorySize); //Keep track of inventory
             sensor.AddObservation((float)enemyPlayer.gameManager.timerSecondsLeft / enemyPlayer.gameManager.timerTotalSeconds); //Keep track of time left
@@ -684,7 +682,7 @@ public class EnemyPlayer : ParentPlayer
         base.AddScore(index);
         //enemyAgent.AddReward(inventory[index].points*enemyAgent.defaultRewardWeight); //Add points of deposited items as reward
         enemyAgent.AddReward((float)inventory[index].points / 20); //Normalize reward based on max points (5 - Gold)
-        Debug.Log("Base deposit reward: " + (float)inventory[index].points / 30);
+        Debug.Log("Base deposit reward: " + (float)inventory[index].points / 20);
 
         /*
         if(score >= enemyAgent.EndEpisodeScore && enemyAgent.itemSpawner.agentTrainingLevel)

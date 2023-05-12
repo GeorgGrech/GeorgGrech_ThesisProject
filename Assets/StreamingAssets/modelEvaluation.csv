@@ -1,5 +1,4 @@
-ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,Round5Score,Round6Score,Round7Score,Round8Score,Round9Score,Round10Score,AvgScore
-0,0-ResourceAgent-1482,345,340,395,325,270,415,325,425,415,340,359.5,
-1,1-ResourceAgent-11994,470,445,395,485,470,425,500,500,455,465,461,
-2,2-ResourceAgent-92955,480,445,465,480,475,555,470,530,400,385,468.5,
-3,3-ResourceAgent-199486,390,460,340,555,485,385,340,550,530,395,443,
+ModelNumber,ModelName,Round1Score,Round2Score,Round3Score,Round4Score,AvgScore
+0,0-ResourceAgent-1482,390,290,400,380,365,
+1,1-ResourceAgent-11994,405,445,385,405,410,
+2,2-ResourceAgent-92955,425,440,470,475,452.5,
